@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>視線追跡 植物解説標識</title>
+  <script src="./webgazer.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-outer: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+      --sign-bg: #ffffff;
+      --sign-border: #81c784;
+      --primary: #4CAF50;
+      --primary-light: #A5D6A7;
+      --text-primary: #2e3d30;
+      --text-secondary: #4a5c4d;
+      --text-light: #7a8c7d;
+      --text-taxonomy: #5a6c5d;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg-outer);
+      overflow: hidden;
+      color: var(--text-primary);
+    }
+
+    /* 标识居中容器 */
+    .sign-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 3vh; 
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 10;
+      box-sizing: border-box;
+    }
+
+    /* 标识卡片 */
+    .sign-card {
+      background-color: var(--sign-bg);
+      border: 1px solid var(--sign-border);
+      border-radius: 14px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      width: 90vw;
+      max-width: 1200px;
+      height: auto; 
+      max-height: 93vh;
+      padding: 36px 52px;
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 24px 52px;
+      overflow-y: auto; 
+    }
+
+    /* 标牌支柱 */
+    .sign-pole {
+      width: 28px;
+      flex-grow: 1;
+      background-color: var(--sign-bg);
+      border-left: 1px solid var(--sign-border);
+      border-right: 1px solid var(--sign-border);
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+      margin-top: -15px; /* 向上延伸到卡片内部一点点 */
+      z-index: 1; /* 位于卡片下方 */
+    }
+
+    /* 左右分栏容器，让内部元素自然紧密排列在顶部 */
+    .col-left, .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      justify-content: flex-start;
+    }
+
+    /* SVG 装饰 */
+    .icon-svg {
+      width: 1.2em;
+      height: 1.2em;
+      vertical-align: -0.22em;
+      margin-right: 6px;
+      stroke-width: 2.2;
+      display: inline-block;
+    }
+
+    .origami-decorations {
+      position: absolute;
+      top: 25px;
+      right: 40px;
+      transform: scale(0.85);
+      transform-origin: top right;
+      pointer-events: none;
+    }
+
+    /* 各追踪区域通用样式 */
+    .zone {
+      padding: 12px;
+      transition: background-color 0.5s ease, box-shadow 0.5s ease, border-radius 0.5s ease, padding 0.5s ease, opacity 0.5s ease;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    /* 文本过渡样式 */
+    .zone-text {
+      transition: font-size 0.5s ease, color 0.5s ease, text-decoration 0.3s ease, text-shadow 0.5s ease;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 正常的文档流展开 */
+    .expanded-detail {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 0;
+      background-color: rgba(240, 248, 241, 0.8);
+      padding: 0 10px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary-light);
+      transition: opacity 0.8s ease, max-height 0.8s ease, margin-top 0.5s ease, padding 0.5s ease;
+    }
+
+    /* ================= 各个区域专属排版 ================= */
+    #zone-title {
+      grid-column: 1 / 3;
+      padding-right: 150px;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 8px;
+    }
+    .subtitle {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .main-title {
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* 分类标签：改为左对齐并加上左边框，使其更有副标题结构感 */
+    #zone-taxonomy {
+      text-align: left;
+      border-left: 4px solid var(--primary-light);
+      border-radius: 0 10px 10px 0;
+      padding-left: 15px;
+    }
+
+    #zone-bubble {
+      background-color: #81C784; 
+      color: white;
+      border-radius: 20px 20px 20px 0;
+      padding: 15px;
+      position: relative;
+    }
+    #zone-bubble .zone-text { color: #ffffff; }
+
+    #zone-image {
+      padding: 10px;
+    }
+    .plant-img {
+      width: 100%;
+      max-height: 28vh; 
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: block;
+      transition: max-height 0.5s ease;
+    }
+    .img-caption {
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    #zone-body {
+      font-family: 'Noto Serif JP', serif;
+    }
+    #zone-body p {
+      margin-bottom: 8px; 
+      margin-top: 0;
+    }
+
+    /* 底部标注：因为脱离了强行拉伸的网格，现在会紧凑地包裹文字 */
+    #zone-callout {
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      text-align: center;
+      background-color: transparent;
+      padding: 15px;
+    }
+
+    /* ================= WebGazer 覆盖 ================= */
+    #webgazerVideoFeed {
+      position: fixed !important;
+      top: 16px !important;
+      right: 16px !important;
+      width: 160px !important;
+      height: 120px !important;
+      border-radius: 12px !important;
+      border: 2px solid rgba(255,255,255,0.8) !important;
+      z-index: 400 !important;
+      object-fit: cover !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    #webgazerFaceOverlay, #webgazerFaceFeedbackBox {
+      display: none !important;
+    }
+
+    /* ================= 校准遮罩 ================= */
+    #calibration-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(240, 248, 241, 0.95);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #2e3d30;
+    }
+    .calib-step { display: none; text-align: center; }
+    .calib-step.active { display: block; }
+    #step-2.active {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: block;
+      z-index: 1001;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: background 0.3s;
+    }
+    .btn-primary:hover { background: #388E3C; }
+
+    #calib-points-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1002;
+    }
+    .calib-point {
+      position: fixed;
+      width: 30px; height: 30px;
+      background: var(--primary);
+      border: 3px solid white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      pointer-events: all;
+      box-shadow: 0 0 0 6px rgba(76,175,80,0.25);
+      animation: pulse-dot 1.2s ease-in-out infinite;
+      transition: width 0.15s, height 0.15s, background 0.15s;
+      z-index: 9999;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(76,175,80,0.3); }
+      50%       { box-shadow: 0 0 0 12px rgba(76,175,80,0); }
+    }
+    .calib-point:active { transform: translate(-50%, -50%) scale(0.85); }
+
+    #calib-progress {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      font-weight: bold;
+      background: rgba(255,255,255,0.9);
+      color: var(--primary);
+      border: 1px solid var(--primary-light);
+      padding: 8px 24px;
+      border-radius: 30px;
+      white-space: nowrap;
+      z-index: 1010;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* 隐藏 WebGazer 自带红色预测点 */
+    #webgazerGazeDot { display: none !important; }
+
+    /* ================= 注视轨迹：全屏 Canvas ================= */
+    #gaze-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 10000;
+      display: none;
+    }
+
+    /* ================= 管理员面板 ================= */
+    #admin-panel {
+      position: fixed;
+      bottom: 0; 
+      transform: translateY(100%); 
+      right: 20px;
+      width: 350px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #C8E6C9;
+      border-radius: 12px 12px 0 0;
+      color: #333;
+      z-index: 600;
+      padding: 20px;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-size: 14px;
+    }
+    #admin-panel.open { transform: translateY(0); }
+    
+    #admin-toggle {
+      position: fixed;
+      bottom: 20px; right: 20px;
+      width: 44px; height: 44px;
+      background: var(--primary); color: white;
+      border-radius: 50%; border: 2px solid #81C784;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 601;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    #admin-toggle:hover { transform: rotate(90deg); }
+
+    .admin-header {
+      display: flex; justify-content: space-between;
+      border-bottom: 1px solid #EEE; padding-bottom: 10px; margin-bottom: 15px;
+    }
+    .admin-close { cursor: pointer; color: #888; font-weight: bold; }
+    .admin-close:hover { color: #333; }
+
+    .admin-row { margin-bottom: 12px; }
+    .admin-row label { display: block; margin-bottom: 5px; color: #555; }
+    .admin-row input[type=range] { width: 100%; }
+    .admin-val { float: right; color: var(--primary); font-weight: bold; }
+
+    .weight-bars { margin-top: 15px; border-top: 1px solid #EEE; padding-top: 10px; }
+    .weight-bar-row { display: flex; align-items: center; margin-bottom: 5px; }
+    .weight-label { width: 80px; font-size: 12px; color: #666; }
+    .weight-track { flex-grow: 1; height: 8px; background: #EEE; border-radius: 4px; overflow: hidden; margin-right: 10px;}
+    .weight-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.1s; }
+    .weight-num { width: 30px; text-align: right; font-size: 12px; }
+
+    .btn-reset {
+      width: 100%; padding: 8px; margin-top: 15px;
+      background: #F5F5F5; color: #333; border: 1px solid #CCC; border-radius: 4px; cursor: pointer;
+    }
+    .btn-reset:hover { background: #E0E0E0; }
+  </style>
+</head>
+<body>
+
+  <div class="sign-wrapper">
+    <div class="sign-card">
+      
+      <!-- 装饰：右上角折纸鹤 -->
+      <div class="origami-decorations">
+        <svg width="70" height="60" viewBox="0 0 100 85" fill="none" style="position:absolute; right:0; top:0;">
+          <path d="M50 40 L20 10 L45 25 Z" fill="#A5D6A7"/>
+          <path d="M50 40 L80 10 L55 25 Z" fill="#81C784"/>
+          <path d="M50 40 L45 25 L50 15 L55 25 Z" fill="#66BB6A"/>
+          <path d="M50 40 L10 50 L40 45 Z" fill="#81C784"/>
+          <path d="M50 40 L90 50 L60 45 Z" fill="#A5D6A7"/>
+          <path d="M50 40 L40 45 L50 80 L60 45 Z" fill="#4CAF50"/>
+        </svg>
+        <svg width="45" height="40" viewBox="0 0 100 85" fill="none" style="position:absolute; right:70px; top:15px;">
+          <path d="M50 40 L20 10 L45 25 Z" fill="#F0D080"/>
+          <path d="M50 40 L80 10 L55 25 Z" fill="#D4A843"/>
+          <path d="M50 40 L45 25 L50 15 L55 25 Z" fill="#B08020"/>
+          <path d="M50 40 L10 50 L40 45 Z" fill="#D4A843"/>
+          <path d="M50 40 L90 50 L60 45 Z" fill="#F0D080"/>
+          <path d="M50 40 L40 45 L50 80 L60 45 Z" fill="#A07010"/>
+        </svg>
+        <svg width="35" height="30" viewBox="0 0 100 85" fill="none" style="position:absolute; right:20px; top:55px;">
+          <path d="M50 40 L20 10 L45 25 Z" fill="#F0A060"/>
+          <path d="M50 40 L80 10 L55 25 Z" fill="#E07020"/>
+          <path d="M50 40 L45 25 L50 15 L55 25 Z" fill="#C05010"/>
+          <path d="M50 40 L10 50 L40 45 Z" fill="#E07020"/>
+          <path d="M50 40 L90 50 L60 45 Z" fill="#F0A060"/>
+          <path d="M50 40 L40 45 L50 80 L60 45 Z" fill="#A04000"/>
+        </svg>
+      </div>
+
+      <!-- zone-title (Row 1) -->
+      <div id="zone-title" class="zone">
+        <div class="zone-text subtitle" data-base-font-size="16" style="font-size: 16px;">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+          空を舞う折り鶴？
+        </div>
+        <div class="zone-text main-title" data-base-font-size="36" style="font-size: 36px;">オリヅルラン（折鶴蘭）</div>
+        <div class="expanded-detail">英語名：Spider Plant（スパイダープラント）。長い茎の先に垂れ下がる子株が蜘蛛の巣のように見えることからこの名前がつきました。</div>
+      </div>
+
+      <!-- Left Column (Row 2, Col 1) -->
+      <div class="col-left">
+        <div id="zone-bubble" class="zone">
+          <div class="zone-text" data-base-font-size="14" style="font-size: 14px;">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+            僕たちは、部屋の空気をきれいにする「天然の空気清浄機」と呼ばれています。でも、僕の本当の魅力は、その不思議な形にあることを知っていますか？
+          </div>
+          <div class="expanded-detail" style="color:#2e3d30;">研究によると、24時間で空気中の有害物質を最大90%除去できるといわれています！</div>
+          <div style="position:absolute; bottom:-15px; right:30px; width:0; height:0; border-left:15px solid transparent; border-right:0 solid transparent; border-top:15px solid inherit; background-color:inherit; clip-path: polygon(0 0, 100% 0, 100% 100%);"></div>
+        </div>
+
+        <div id="zone-image" class="zone">
+          <img src="./plant.png" alt="オリヅルラン" class="plant-img">
+          <div class="zone-text img-caption" data-base-font-size="13" style="font-size: 13px; color: var(--text-light);">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:1em; height:1em; stroke-width:2;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            花言葉：集う幸福（家族や友達と集まる喜び）
+          </div>
+          <div class="expanded-detail">育て方のポイント：水やりは土が乾いてから。直射日光を避け、明るい日陰が最適です。</div>
+        </div>
+      </div>
+
+      <!-- Right Column (Row 2, Col 2) -->
+      <div class="col-right">
+        <div id="zone-taxonomy" class="zone">
+          <div class="zone-text" data-base-font-size="14" style="font-size: 14px; color: var(--text-taxonomy); font-weight: bold;">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+            Chlorophytum comosum　　キジカクシ科　オリヅルラン属
+          </div>
+          <div class="expanded-detail">原産地：南アフリカ。世界中に広く普及し、最も人気のある観葉植物のひとつです。</div>
+        </div>
+
+        <div id="zone-body" class="zone">
+          <p class="zone-text" data-base-font-size="16" style="font-size: 16px;">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary);"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            細長い葉の間から、ぴょんと元気に飛び出した茎を見てください。
+          </p>
+          <p class="zone-text" data-base-font-size="16" style="font-size: 16px;">その先に揺れている小さな赤ちゃんたちは、まるでお祝いの「折り鶴」を吊り下げているように見えませんか？</p>
+          <p class="zone-text" data-base-font-size="16" style="font-size: 16px;">実は、空気中の有害物質を吸収する能力が非常に高く、NASAの研究でも「エコ・プラント」として高く評価されています。</p>
+          <div class="expanded-detail">葉は非常に柔らかく、触れると意外な瑞々しさを感じられます。緑と白のコントラストが美しいこの模様は、一枚一枚が少しずつ異なります。</div>
+        </div>
+
+        <div id="zone-callout" class="zone">
+          <div class="zone-text" style="color: var(--primary); font-weight: bold; padding: 5px; font-size: 15px;" data-base-font-size="15">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+            シュッとした見た目よりも、ずっと柔らかくて瑞々しい感触がするはずです!!!
+          </div>
+          <div class="expanded-detail">ぜひ実際に手で触れて、その感触を体験してみてください！きっと驚くはずです。</div>
+        </div>
+      </div>
+
+    </div>
+    
+    <div class="sign-pole"></div>
+  </div>
+
+
+  <canvas id="gaze-canvas"></canvas>
+
+  <!-- 校准遮罩 -->
+  <div id="calibration-overlay">
+    <div id="step-1" class="calib-step active">
+      <h1>視線追跡の準備</h1>
+      <p>カメラを使用して視線を追跡します。（映像は外部に送信されません）</p>
+      <p id="saved-data-hint" style="display:none; color:#4CAF50; font-weight:bold;">✔ 前回のキャリブレーションデータが見つかりました。</p>
+      <button class="btn-primary" onclick="startCalibration()">📷 カメラを許可してキャリブレーション開始</button>
+      <br>
+      <button class="btn-primary" onclick="startDemoMode()" style="margin-top:12px; background:#757575;">🖱️ マウスでデモ（カメラ不要）</button>
+      <p style="font-size:12px; color:#888; margin-top:16px;">マウスモードではマウスカーソルの位置が注視点として扱われます</p>
+    </div>
+
+    <div id="step-2" class="calib-step">
+      <div id="calib-progress">点滅している点をクリックしてください (0/9)</div>
+      <div id="calib-points-container"></div>
+    </div>
+
+    <div id="step-3" class="calib-step">
+      <h1 style="color: #4CAF50;">✔ キャリブレーション完了！</h1>
+      <p>現在、視線の動きをプレビューしています。画面上の光の輪が視線の動きに追従するか確認してください。</p>
+      <div style="margin-top: 24px;">
+        <button class="btn-primary" onclick="confirmCalibration()">確認して開始</button>
+        <button class="btn-primary" onclick="recalibrate()" style="background:#757575; margin-left:12px;">再キャリブレーション</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理员面板 -->
+  <div id="admin-toggle" onclick="toggleAdmin()">⚙</div>
+  <div id="admin-panel">
+    <div class="admin-header">
+      <strong>🛠 管理ツール</strong>
+      <span class="admin-close" onclick="toggleAdmin()">[×閉じる]</span>
+    </div>
+    
+    <div class="admin-row">
+      <label>注視感度（上昇速度） <span class="admin-val" id="val-sens">7.5</span> /s</label>
+      <input type="range" id="inp-sens" min="1" max="40" step="0.5" value="7.5">
+    </div>
+    <div class="admin-row">
+      <label>減衰速度（非注視時） <span class="admin-val" id="val-decay">3</span> /s</label>
+      <input type="range" id="inp-decay" min="0.5" max="20" step="0.5" value="3">
+    </div>
+    <div class="admin-row">
+      <label>スムージング係数 <span class="admin-val" id="val-smooth">0.25</span></label>
+      <input type="range" id="inp-smooth" min="0.05" max="0.8" step="0.01" value="0.25">
+    </div>
+    <div class="admin-row" style="display:flex; align-items:center;">
+      <input type="checkbox" id="inp-show-dot" checked style="margin-right:8px; width:auto;">
+      <label style="margin:0; display:inline;">注視点を表示</label>
+    </div>
+
+    <div class="weight-bars">
+      <div style="font-size:12px; color:#888; margin-bottom:8px;">── ゾーン注視ウェイト ──</div>
+      <div id="bars-container"></div>
+    </div>
+
+    <div style="margin-top:10px; color:#AAA;">現在の注視座標: <span id="current-coords">(0, 0)</span></div>
+    
+    <button class="btn-reset" onclick="resetAllZones()">🔄 全ゾーンをリセット</button>
+  </div>
+
+<script>
+  const zoneState = {
+    'zone-title':    { weight: 0 },
+    'zone-taxonomy': { weight: 0 },
+    'zone-bubble':   { weight: 0 },
+    'zone-image':    { weight: 0 },
+    'zone-body':     { weight: 0 },
+    'zone-callout':  { weight: 0 }
+  };
+
+  const zoneNames = {
+    'zone-title': 'タイトル',
+    'zone-taxonomy': '分類',
+    'zone-bubble': 'ふきだし',
+    'zone-image': '画像',
+    'zone-body': '本文',
+    'zone-callout': 'コールアウト'
+  };
+
+  const settings = {
+    sensitivity: 7.5,
+    decay: 3,
+    smoothing: 0.25,
+    showGazeDot: true
+  };
+
+  let currentGazeZone = null;
+  let smoothX = window.innerWidth / 2;
+  let smoothY = window.innerHeight / 2;
+  let isCalibrated = false;
+  let isDemoMode = false;
+  let interactionEnabled = false; // 动态响应是否激活（用于排除开始时的干扰）
+
+  // 注视轨迹缓冲区：保存过去 2 秒内所有平滑坐标
+  const gazeHistory = [];
+  const HISTORY_DURATION = 2000; // ms
+
+  let zoneRects = {};
+  setInterval(() => {
+    for (const id in zoneState) {
+      const el = document.getElementById(id);
+      if (el) zoneRects[id] = el.getBoundingClientRect();
+    }
+  }, 1000);
+
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      const saved = localStorage.getItem('webgazerGlobalData');
+      if (saved && JSON.parse(saved).data && JSON.parse(saved).data.length > 10) {
+        document.getElementById('saved-data-hint').style.display = 'block';
+      }
+    } catch(e) {}
+  });
+
+  function startDemoMode() {
+    isDemoMode = true;
+    isCalibrated = true;
+    document.getElementById('calibration-overlay').style.opacity = '0';
+    document.getElementById('calibration-overlay').style.transition = 'opacity 0.5s';
+    setTimeout(() => {
+      document.getElementById('calibration-overlay').style.display = 'none';
+      if (settings.showGazeDot) showGazeCanvas();
+      for (const id in zoneState) {
+        const el = document.getElementById(id);
+        if (el) zoneRects[id] = el.getBoundingClientRect();
+      }
+      document.addEventListener('mousemove', (e) => {
+        onGaze(e.clientX, e.clientY);
+      });
+      requestAnimationFrame(mainLoop);
+      interactionEnabled = true; // 鼠标模拟模式不需要冷却
+    }, 500);
+  }
+
+  let canvasLoopRunning = false;
+
+  function showGazeCanvas() {
+    const c = document.getElementById('gaze-canvas');
+    c.width  = window.innerWidth;
+    c.height = window.innerHeight;
+    c.style.display = 'block';
+    window.addEventListener('resize', () => {
+      c.width  = window.innerWidth;
+      c.height = window.innerHeight;
+    });
+    // 独立的 Canvas 绘制循环，不依赖 mainLoop
+    if (!canvasLoopRunning) {
+      canvasLoopRunning = true;
+      function canvasLoop() {
+        drawGazeCanvas();
+        if (canvasLoopRunning) requestAnimationFrame(canvasLoop);
+      }
+      requestAnimationFrame(canvasLoop);
+    }
+  }
+
+  const calibPoints = [
+    [10, 10], [50, 10], [90, 10],
+    [10, 50], [50, 50], [90, 50],
+    [10, 90], [50, 90], [90, 90]
+  ];
+  let currentCalibIdx = 0;
+  let currentPointClicks = 0;
+
+  function startCalibration() {
+    const progressEl = document.getElementById('calib-progress');
+    const step1El = document.getElementById('step-1');
+    const step2El = document.getElementById('step-2');
+
+    step1El.classList.remove('active');
+    step2El.classList.add('active');
+    progressEl.innerText = '📷 カメラを起動中...';
+
+    // v3.x 正确用法：分步调用，不链式，让 WebGazer 自己管理摄像头
+    window.saveDataAcrossSessions = true;
+    webgazer.setRegression('ridge');
+    webgazer.setGazeListener((data, elapsed) => {
+      if (!data) return;
+      // 始终更新 dot 位置（校准阶段也可见）
+      onGaze(data.x, data.y);
+    });
+
+    // begin() 接受一个「失败回调」作为第一个参数（v3 API）
+    webgazer.begin(
+      // onFail: 摄像头访问失败时调用
+      (err) => {
+        console.error('WebGazer カメラ失敗:', err);
+        let msg = '⚠ カメラにアクセスできませんでした。<br>';
+        if (err && err.name === 'NotAllowedError') {
+          msg += 'カメラの権限が拒否されています。<br>URLバーの 🔒 アイコンからカメラを<b>許可</b>してください。';
+        } else if (err && err.name === 'NotFoundError') {
+          msg += 'カメラデバイスが見つかりません。';
+        } else if (err && err.name === 'NotReadableError') {
+          msg += '他のアプリがカメラを占有しています。Zoom/Teamsなどを閉じてから再試行してください。';
+        } else {
+          msg += `エラー: ${err ? (err.name + ' — ' + err.message) : '不明'}`;
+        }
+        progressEl.innerHTML = msg + '<br><br>👇 マウスモードを使用してください。';
+        setTimeout(() => {
+          step2El.classList.remove('active');
+          step1El.classList.add('active');
+        }, 4000);
+      }
+    ).then(() => {
+      // begin() 成功，摄像头已启动
+      webgazer.showVideoPreview(true);
+      webgazer.showFaceOverlay(false);
+      webgazer.showFaceFeedbackBox(false);
+      // 校准阶段展示 canvas，让用户实时看到轨迹反馈
+      showGazeCanvas();
+
+      // 显示校准点
+      showNextCalibPoint();
+      progressEl.innerText = `点滅している点をクリックしてください (0/9)`;
+    }).catch(err => {
+      // begin() 本身抛出的其他错误（模型加载失败等）
+      console.error('WebGazer begin() エラー:', err);
+      progressEl.innerHTML = `⚠ モデルの読み込みに失敗しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>👇 マウスモードを使用してください。`;
+      setTimeout(() => {
+        step2El.classList.remove('active');
+        step1El.classList.add('active');
+      }, 4000);
+    });
+  }
+
+  function showNextCalibPoint() {
+    const container = document.getElementById('calib-points-container');
+    container.innerHTML = '';
+    currentPointClicks = 0;
+
+    if (currentCalibIdx >= calibPoints.length) {
+      finishCalibration();
+      return;
+    }
+
+    document.getElementById('calib-progress').innerText = `点滅している点をクリックしてください (${currentCalibIdx}/9)`;
+    
+    const [x, y] = calibPoints[currentCalibIdx];
+    const pt = document.createElement('div');
+    pt.className = 'calib-point';
+    pt.style.left = x + 'vw';
+    pt.style.top = y + 'vh';
+    pt.style.display = 'block';
+    
+    pt.onclick = () => {
+      currentPointClicks++;
+      const ratio = currentPointClicks / 3;
+      const size = Math.max(12, 30 - currentPointClicks * 6);
+      pt.style.width  = size + 'px';
+      pt.style.height = size + 'px';
+      pt.style.background = `hsl(120, 80%, ${60 - ratio*20}%)`;
+      if (currentPointClicks >= 3) {
+        currentCalibIdx++;
+        showNextCalibPoint();
+      }
+    };
+    container.appendChild(pt);
+  }
+
+  function finishCalibration() {
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-3').classList.add('active');
+    document.getElementById('calib-progress').innerText = `(9/9)`;
+    // 停留在 step-3 等待用户点击确认或重新校准
+  }
+
+  function confirmCalibration() {
+    document.getElementById('calibration-overlay').style.opacity = '0';
+    document.getElementById('calibration-overlay').style.transition = 'opacity 1s';
+    setTimeout(() => {
+      document.getElementById('calibration-overlay').style.display = 'none';
+      isCalibrated = true;
+      gazeHistory.length = 0;
+      for (const id in zoneState) { zoneState[id].weight = 0; }
+      applyAllZoneEffects();
+      if (!settings.showGazeDot) {
+        document.getElementById('gaze-canvas').style.display = 'none';
+      }
+      webgazer.removeMouseEventListeners();
+      for (const id in zoneState) {
+        const el = document.getElementById(id);
+        if (el) zoneRects[id] = el.getBoundingClientRect();
+      }
+      requestAnimationFrame(mainLoop);
+
+      // 给予2秒的冷却时间，排除确认点击和头部初始移动造成的干扰
+      setTimeout(() => {
+        gazeHistory.length = 0; // 清除冷却期间收集的无效轨迹
+        interactionEnabled = true;
+      }, 2000);
+    }, 1000);
+  }
+
+  function recalibrate() {
+    currentCalibIdx = 0;
+    currentPointClicks = 0;
+    document.getElementById('step-3').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    showNextCalibPoint();
+  }
+  // 将历史注视点拟合为一个有机闭合轮廓（玻璃水珠效果）
+  function drawGazeCanvas() {
+    const canvas = document.getElementById('gaze-canvas');
+    if (!canvas || canvas.style.display === 'none') return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (gazeHistory.length < 2) return;
+
+    // 1. 计算所有历史点的重心与标准差（分散度）
+    const cx = gazeHistory.reduce((s, p) => s + p.x, 0) / gazeHistory.length;
+    const cy = gazeHistory.reduce((s, p) => s + p.y, 0) / gazeHistory.length;
+    const stdX = Math.sqrt(gazeHistory.reduce((s, p) => s + (p.x - cx) ** 2, 0) / gazeHistory.length);
+    const stdY = Math.sqrt(gazeHistory.reduce((s, p) => s + (p.y - cy) ** 2, 0) / gazeHistory.length);
+
+    // 2. 基础半径 = 分散度 × 放大系数 + 最小半径
+    //    随着历史点增多（时间积累），分散度自然增大，形状自然扩展
+    const baseRx = Math.max(55, stdX * 2.5 + 48);
+    const baseRy = Math.max(44, stdY * 2.5 + 38);
+
+    // 3. 在圆上采 N 个控制点，叠加慢速谐波使轮廓有机化
+    const N = 10;
+    const t = performance.now() / 1000;
+    const pts = [];
+    for (let i = 0; i < N; i++) {
+      const a = (i / N) * Math.PI * 2;
+      // 三个不同频率的谐波叠加，形成不规则轮廓
+      const v =
+        Math.sin(a * 2 + t * 0.55) * 0.11 +
+        Math.sin(a * 3 - t * 0.38) * 0.07 +
+        Math.sin(a * 1.5 + t * 0.72) * 0.08;
+      pts.push({
+        x: cx + Math.cos(a) * baseRx * (1 + v),
+        y: cy + Math.sin(a) * baseRy * (1 + v * 0.8)
+      });
+    }
+
+    // 4. 用二次贝塞尔（中点法）绘制平滑闭合曲线
+    const startMidX = (pts[N - 1].x + pts[0].x) / 2;
+    const startMidY = (pts[N - 1].y + pts[0].y) / 2;
+    ctx.beginPath();
+    ctx.moveTo(startMidX, startMidY);
+    for (let i = 0; i < N; i++) {
+      const cur  = pts[i];
+      const next = pts[(i + 1) % N];
+      ctx.quadraticCurveTo(cur.x, cur.y, (cur.x + next.x) / 2, (cur.y + next.y) / 2);
+    }
+    ctx.closePath();
+
+    // 5. 纯描边，无填充——玻璃水珠效果
+    // 外层漫反射光晕
+    ctx.save();
+    ctx.strokeStyle = 'rgba(76, 175, 80, 0.10)';
+    ctx.lineWidth = 6;
+    ctx.shadowColor = 'rgba(76, 175, 80, 0.18)';
+    ctx.shadowBlur = 28;
+    ctx.stroke();
+    ctx.restore();
+
+    // 主描边（清晰发光轮廓）
+    ctx.save();
+    ctx.strokeStyle = 'rgba(76, 175, 80, 0.40)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = 'rgba(76, 175, 80, 0.35)';
+    ctx.shadowBlur = 14;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function pushGazeHistory(x, y) {
+    const now = performance.now();
+    gazeHistory.push({ x, y, t: now });
+    const cutoff = now - HISTORY_DURATION;
+    while (gazeHistory.length > 0 && gazeHistory[0].t < cutoff) {
+      gazeHistory.shift();
+    }
+  }
+
+  function onGaze(rawX, rawY) {
+    smoothX = smoothX * (1 - settings.smoothing) + rawX * settings.smoothing;
+    smoothY = smoothY * (1 - settings.smoothing) + rawY * settings.smoothing;
+    pushGazeHistory(smoothX, smoothY);
+    document.getElementById('current-coords').innerText = `(${Math.round(smoothX)}, ${Math.round(smoothY)})`;
+  }
+
+  function getZoneAtPoint(x, y) {
+    for (const id in zoneRects) {
+      const r = zoneRects[id];
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        return id;
+      }
+    }
+    return null;
+  }
+
+  let lastFrameTime = performance.now();
+
+  function mainLoop(now) {
+    const dt = (now - lastFrameTime) / 1000;
+    lastFrameTime = now;
+
+    if (interactionEnabled) {
+      updateWeights(dt);
+    }
+    applyAllZoneEffects();
+    updateAdminWeightBars();
+    // drawGazeCanvas 由独立的 canvasLoop 负责
+
+    requestAnimationFrame(mainLoop);
+  }
+
+  // 基于 2 秒历史缓冲区计算各区域权重：
+  // 某区域在缓冲区中占的比例越高，权重上升越快
+  function updateWeights(dt) {
+    // 统计每个区域在历史缓冲中的出现次数
+    const counts = {};
+    for (const id in zoneState) counts[id] = 0;
+    for (const pt of gazeHistory) {
+      const z = getZoneAtPoint(pt.x, pt.y);
+      if (z) counts[z]++;
+    }
+    const total = Math.max(gazeHistory.length, 1);
+
+    for (const id in zoneState) {
+      const ratio = counts[id] / total; // 0~1：占历史的比例
+      if (ratio > 0.05) {
+        // 比例越高，权重上升越快（最多 2× sensitivity）
+        zoneState[id].weight = Math.min(100,
+          zoneState[id].weight + settings.sensitivity * dt * Math.min(ratio * 4, 2)
+        );
+      } else {
+        zoneState[id].weight = Math.max(0,
+          zoneState[id].weight - settings.decay * dt
+        );
+      }
+    }
+  }
+
+  function applyAllZoneEffects() {
+    for (const id in zoneState) {
+      applyZoneEffect(id);
+    }
+  }
+
+  function applyZoneEffect(zoneId) {
+    const w = zoneState[zoneId].weight;
+    
+    // 找出当前权重最高的区域及其ID
+    let maxFocusedZoneId = null;
+    let maxW = 0;
+    for (const [id, state] of Object.entries(zoneState)) {
+      if (state.weight > maxW) {
+        maxW = state.weight;
+        maxFocusedZoneId = id;
+      }
+    }
+    
+    const zoneCols = {
+      'zone-title': 'top',
+      'zone-bubble': 'left',
+      'zone-image': 'left',
+      'zone-taxonomy': 'right',
+      'zone-body': 'right',
+      'zone-callout': 'right'
+    };
+
+    const zone = document.getElementById(zoneId);
+    if (!zone) return;
+
+    // ★ 计算退晕和缩小比例
+    const isOtherFocused = (maxW > 50 && w < 20);
+    const fadeRatio = isOtherFocused ? ((maxW - 50) / 50) : 0; // 全局淡化
+    const isSameCol = maxFocusedZoneId && (zoneCols[zoneId] === zoneCols[maxFocusedZoneId]);
+    const shrinkRatio = (isOtherFocused && isSameCol) ? fadeRatio : 0; // 仅同列缩小
+
+    // 1. 缩小内边距（仅同列）与透明度退晕（全局）
+    const basePadding = 12;
+    zone.style.padding = `${basePadding - (6 * shrinkRatio)}px`;
+    zone.style.opacity = `${1 - 0.6 * fadeRatio}`;
+
+    // 2. 如果是图片区域
+    if (zoneId === 'zone-image') {
+      const img = zone.querySelector('.plant-img');
+      if (img) {
+        if (w > 50) {
+           const growRatio = (w - 50) / 50;
+           img.style.maxHeight = `${28 + (12 * growRatio)}vh`; 
+        } else if (isOtherFocused && isSameCol) {
+           img.style.maxHeight = `${28 - (8 * shrinkRatio)}vh`; // 缩小图片腾出同列空间
+        } else {
+           img.style.maxHeight = '28vh';
+        }
+      }
+    }
+
+    if (zoneId === 'zone-bubble') {
+      const baseR = 129, baseG = 199, baseB = 132;
+      const targetR = 76,  targetG = 175, targetB = 80;
+      const t = Math.min(1, w / 50);
+      const r = Math.round(baseR + (targetR - baseR) * t);
+      const g = Math.round(baseG + (targetG - baseG) * t);
+      const b = Math.round(baseB + (targetB - baseB) * t);
+      zone.style.backgroundColor = `rgb(${r},${g},${b})`;
+    } else {
+      const bgAlpha = w > 10 ? ((w - 10) / 90) * 0.10 : 0;
+      zone.style.backgroundColor = `rgba(76, 175, 80, ${bgAlpha})`;
+    }
+
+    let fontBoost = 0;
+    if (w >= 30) {
+      fontBoost = w < 70 ? ((w - 30) / 40) * 5 : 5 + ((w - 70) / 30) * 3;
+    } else if (isOtherFocused) {
+      fontBoost = -3 * shrinkRatio; // 缩小字号
+    }
+    
+    const darkness = Math.round(74 - (w / 100) * 44);
+    let textColor = `rgb(${darkness}, ${darkness + 10}, ${darkness})`;
+    
+    if (zoneId === 'zone-bubble') {
+      textColor = '#ffffff'; 
+    } else if (zoneId === 'zone-title' && w > 30) {
+      textColor = ''; 
+    }
+
+    zone.querySelectorAll('.zone-text').forEach(el => {
+      const base = parseFloat(el.dataset.baseFontSize || 16);
+      el.style.fontSize = (base + fontBoost) + 'px';
+      
+      if (!el.classList.contains('subtitle') && zoneId !== 'zone-bubble' && !el.style.color.includes('var')) {
+        el.style.color = textColor;
+      }
+      
+      if (w > 55) {
+        el.style.textDecoration = 'underline';
+        el.style.textDecorationColor = zoneId==='zone-bubble' ? 'rgba(255,255,255,0.8)' : 'var(--primary)';
+      } else {
+        el.style.textDecoration = 'none';
+      }
+
+      if (w > 80) {
+        el.style.textShadow = zoneId==='zone-bubble' ? '0 2px 5px rgba(0,0,0,0.2)' : `0 0 ${(w-80)/4}px rgba(76, 175, 80, 0.3)`;
+      } else {
+        el.style.textShadow = 'none';
+      }
+    });
+
+    // 恢复内联展开，通过 max-height 控制，由父级 grid 1fr 吸收空间变化
+    const detail = zone.querySelector('.expanded-detail');
+    if (detail) {
+      if (w > 70) {
+        detail.style.opacity = Math.min((w - 70) / 20, 1).toString();
+        detail.style.maxHeight = '150px';
+        detail.style.marginTop = '10px';
+        detail.style.padding = '8px 10px';
+      } else {
+        detail.style.opacity = '0';
+        detail.style.maxHeight = '0';
+        detail.style.marginTop = '0';
+        detail.style.padding = '0 10px';
+      }
+    }
+
+    if (w > 80 && zoneId !== 'zone-bubble') {
+      zone.style.boxShadow = `0 0 ${(w-80)/2}px rgba(76, 175, 80, 0.2)`;
+    } else if (zoneId !== 'zone-bubble') {
+      zone.style.boxShadow = 'none';
+    }
+  }
+
+  function toggleAdmin() {
+    document.getElementById('admin-panel').classList.toggle('open');
+  }
+
+  const bindSetting = (inputId, valId, settingKey, isFloat=false) => {
+    const inp = document.getElementById(inputId);
+    const val = document.getElementById(valId);
+    inp.addEventListener('input', (e) => {
+      const v = isFloat ? parseFloat(e.target.value) : parseInt(e.target.value);
+      settings[settingKey] = v;
+      val.innerText = v;
+    });
+  };
+  bindSetting('inp-sens', 'val-sens', 'sensitivity', true);
+  bindSetting('inp-decay', 'val-decay', 'decay', true);
+  bindSetting('inp-smooth', 'val-smooth', 'smoothing', true);
+
+  document.getElementById('inp-show-dot').addEventListener('change', (e) => {
+    settings.showGazeDot = e.target.checked;
+    document.getElementById('gaze-dot').style.display = (settings.showGazeDot && isCalibrated) ? 'block' : 'none';
+  });
+
+  const barsContainer = document.getElementById('bars-container');
+  for (const id in zoneState) {
+    const row = document.createElement('div');
+    row.className = 'weight-bar-row';
+    row.innerHTML = `
+      <div class="weight-label">${zoneNames[id]}</div>
+      <div class="weight-track"><div class="weight-fill" id="bar-${id}"></div></div>
+      <div class="weight-num" id="num-${id}">0</div>
+    `;
+    barsContainer.appendChild(row);
+  }
+
+  function updateAdminWeightBars() {
+    for (const id in zoneState) {
+      const w = zoneState[id].weight;
+      const bar = document.getElementById(`bar-${id}`);
+      const num = document.getElementById(`num-${id}`);
+      if (bar && num) {
+        bar.style.width = `${w}%`;
+        num.innerText = Math.round(w);
+      }
+    }
+  }
+
+  function resetAllZones() {
+    gazeHistory.length = 0; // 同时清除轨迹缓冲区
+    for (const id in zoneState) {
+      zoneState[id].weight = 0;
+    }
+    applyAllZoneEffects();
+    updateAdminWeightBars();
+  }
+
+</script>
+</body>
+</html>
