@@ -371,6 +371,261 @@
       background: #F5F5F5; color: #333; border: 1px solid #CCC; border-radius: 4px; cursor: pointer;
     }
     .btn-reset:hover { background: #E0E0E0; }
+
+    /* ================= 結了ボタン ================= */
+    #end-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: rgba(198, 40, 40, 0.85);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 10px 20px;
+      font-size: 15px;
+      font-family: 'Noto Sans JP', sans-serif;
+      cursor: pointer;
+      z-index: 602;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(198,40,40,0.4);
+      transition: background 0.3s, transform 0.2s;
+    }
+    #end-btn:hover { background: rgba(183,28,28,0.95); transform: scale(1.05); }
+    #end-btn .rec-dot {
+      width: 10px; height: 10px;
+      background: #ff5252;
+      border-radius: 50%;
+      animation: blink-rec 1.2s ease-in-out infinite;
+    }
+    @keyframes blink-rec {
+      0%,100% { opacity:1; } 50% { opacity:0.2; }
+    }
+
+    /* ================= 分析オーバーレイ ================= */
+    #analysis-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #1a2e1c 0%, #0d1f0e 100%);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      color: #e8f5e9;
+      font-family: 'Noto Sans JP', sans-serif;
+      animation: slideInUp 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes slideInUp {
+      from { transform: translateY(40px); opacity:0; }
+      to   { transform: translateY(0);    opacity:1; }
+    }
+    #analysis-overlay.visible { display: flex; }
+
+    .analysis-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 40px 16px;
+      border-bottom: 1px solid rgba(129,199,132,0.25);
+      flex-shrink: 0;
+    }
+    .analysis-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-family: 'Noto Serif JP', serif;
+      color: #a5d6a7;
+      letter-spacing: 0.05em;
+    }
+    .analysis-header h1 span { font-size: 14px; color: #81c784; margin-left: 12px; font-family: 'Noto Sans JP', sans-serif; }
+    #btn-restart {
+      background: rgba(76,175,80,0.2);
+      color: #a5d6a7;
+      border: 1px solid rgba(129,199,132,0.4);
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: background 0.3s;
+    }
+    #btn-restart:hover { background: rgba(76,175,80,0.4); }
+
+    /* ── tab导航栏 ── */
+    .analysis-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 0 40px;
+      border-bottom: 1px solid rgba(129,199,132,0.18);
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: rgba(165,214,167,0.55);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 15px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .tab-btn:hover { color: #a5d6a7; }
+    .tab-btn.active {
+      color: #a5d6a7;
+      border-bottom-color: #4CAF50;
+    }
+
+    /* ── 各tab页面 ── */
+    .analysis-body {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .tab-pane {
+      display: none;
+      width: 100%;
+      height: 100%;
+      padding: 32px 60px;
+      box-sizing: border-box;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+    .tab-pane.active { display: flex; }
+
+    /* ── 热力图页 ── */
+    #heatmap-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0a180b;
+      flex: 1;
+      min-height: 340px;
+    }
+    #heatmap-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #81c784;
+    }
+    .heatmap-legend-bar {
+      flex: 1;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(to right, #0000ff, #00ff00, #ffff00, #ff0000);
+    }
+
+    /* ── 时序图页 ── */
+    #timeline-canvas {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.3);
+    }
+    #timeline-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      color: #c8e6c9;
+    }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── 统计页 ── */
+    #stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    #stats-table th {
+      text-align: left;
+      padding: 12px 16px;
+      color: #81c784;
+      border-bottom: 1px solid rgba(129,199,132,0.3);
+      font-weight: normal;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+    }
+    #stats-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: #c8e6c9;
+    }
+    #stats-table tr:hover td { background: rgba(76,175,80,0.07); }
+    #stats-table tr:last-child td { border-bottom: none; }
+    .zone-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pct-bar-wrap {
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      height: 8px;
+      width: 140px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .pct-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    #summary-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .summary-chip {
+      background: rgba(76,175,80,0.10);
+      border: 1px solid rgba(129,199,132,0.2);
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-align: center;
+    }
+    .summary-chip .val {
+      font-size: 28px;
+      font-weight: bold;
+      color: #a5d6a7;
+    }
+    .summary-chip .lbl {
+      font-size: 12px;
+      color: #81c784;
+      margin-top: 4px;
+    }
+    .page-title {
+      font-size: 18px;
+      font-family: 'Noto Serif JP', serif;
+      color: #81c784;
+      margin: 0 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-desc {
+      font-size: 13px;
+      color: rgba(165,214,167,0.6);
+      margin: 0 0 12px;
+    }
   </style>
 </head>
 <body>
@@ -471,6 +726,57 @@
     <div class="sign-pole"></div>
   </div>
 
+  <!-- 结束按钮 -->
+  <button id="end-btn" onclick="endSession()"><span class="rec-dot"></span>セッションを終了</button>
+
+  <!-- 分析界面 -->
+  <div id="analysis-overlay">
+    <div class="analysis-header">
+      <h1>📊 視線追跡レポート <span id="session-duration-label"></span></h1>
+      <button id="btn-restart" onclick="restartSession()">↩ もう一度やり直す</button>
+    </div>
+    <!-- tab导航 -->
+    <div class="analysis-tabs">
+      <button class="tab-btn active" id="tab-heatmap" onclick="switchTab('heatmap')">🔥 熱力図</button>
+      <button class="tab-btn" id="tab-timeline" onclick="switchTab('timeline')">📈 注視タイムライン</button>
+      <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">📋 ゾーン統計</button>
+    </div>
+    <div class="analysis-body">
+      <!-- 热力图页 -->
+      <div class="tab-pane active" id="pane-heatmap">
+        <p class="page-title">🔥 視線熱力図</p>
+        <p class="page-desc">標識カード上で見た場所を熱力図で示します。赤色は注視度が高いエリア、青色は低いエリアを表します。</p>
+        <div id="heatmap-wrap">
+          <canvas id="heatmap-canvas"></canvas>
+        </div>
+        <div class="heatmap-legend">
+          <span>低</span>
+          <div class="heatmap-legend-bar"></div>
+          <span>高</span>
+        </div>
+      </div>
+      <!-- 时序图页 -->
+      <div class="tab-pane" id="pane-timeline">
+        <p class="page-title">📈 ゾーン注視タイムライン</p>
+        <p class="page-desc">各ゾーンの注視ウェイト（0√100）の時間変化。</p>
+        <canvas id="timeline-canvas"></canvas>
+        <div id="timeline-legend"></div>
+      </div>
+      <!-- 统计页 -->
+      <div class="tab-pane" id="pane-stats">
+        <p class="page-title">📋 ゾーン別注視統計</p>
+        <p class="page-desc">各ゾーンの注視時間・割合・最大ウェイト。</p>
+        <table id="stats-table">
+          <thead>
+            <tr><th>ゾーン</th><th>注視時間</th><th>割合</th><th>最大ウェイト</th></tr>
+          </thead>
+          <tbody id="stats-tbody"></tbody>
+        </table>
+        <div id="summary-stats"></div>
+      </div>
+    </div>
+  </div>
+
 
   <canvas id="gaze-canvas"></canvas>
 
@@ -567,11 +873,26 @@
   let smoothY = window.innerHeight / 2;
   let isCalibrated = false;
   let isDemoMode = false;
-  let interactionEnabled = false; // 动态响应是否激活（用于排除开始时的干扰）
+  let interactionEnabled = false;
 
   // 注视轨迹缓冲区：保存过去 2 秒内所有平滑坐标
   const gazeHistory = [];
   const HISTORY_DURATION = 2000; // ms
+
+  // ── 全量数据记录 ──────────────────────────────────────
+  let gazeLog = [];        // [{x,y,t,zone,weights}, ...]
+  let sessionStart = null;
+  let lastLogTime = 0;
+  const LOG_INTERVAL = 100; // ms，每100ms记一条
+
+  const ZONE_COLORS = {
+    'zone-title':    '#4CAF50',
+    'zone-bubble':   '#66BB6A',
+    'zone-image':    '#26A69A',
+    'zone-taxonomy': '#FFA726',
+    'zone-body':     '#42A5F5',
+    'zone-callout':  '#AB47BC'
+  };
 
   let zoneRects = {};
   setInterval(() => {
@@ -607,6 +928,7 @@
       });
       requestAnimationFrame(mainLoop);
       interactionEnabled = true; // 鼠标模拟模式不需要冷却
+      showEndBtn();
     }, 500);
   }
 
@@ -763,8 +1085,9 @@
 
       // 给予2秒的冷却时间，排除确认点击和头部初始移动造成的干扰
       setTimeout(() => {
-        gazeHistory.length = 0; // 清除冷却期间收集的无效轨迹
+        gazeHistory.length = 0;
         interactionEnabled = true;
+        showEndBtn();
       }, 2000);
     }, 1000);
   }
@@ -858,6 +1181,18 @@
     smoothY = smoothY * (1 - settings.smoothing) + rawY * settings.smoothing;
     pushGazeHistory(smoothX, smoothY);
     document.getElementById('current-coords').innerText = `(${Math.round(smoothX)}, ${Math.round(smoothY)})`;
+
+    // 全量记录（仅 interactionEnabled 后）
+    if (interactionEnabled) {
+      const now = performance.now();
+      if (now - lastLogTime >= LOG_INTERVAL) {
+        lastLogTime = now;
+        const weights = {};
+        for (const id in zoneState) weights[id] = zoneState[id].weight;
+        gazeLog.push({ x: smoothX, y: smoothY, t: now, zone: getZoneAtPoint(smoothX, smoothY), weights });
+        if (!sessionStart) sessionStart = now;
+      }
+    }
   }
 
   function getZoneAtPoint(x, y) {
@@ -1091,12 +1426,350 @@
   }
 
   function resetAllZones() {
-    gazeHistory.length = 0; // 同时清除轨迹缓冲区
+    gazeHistory.length = 0;
     for (const id in zoneState) {
       zoneState[id].weight = 0;
     }
     applyAllZoneEffects();
     updateAdminWeightBars();
+  }
+
+  // ── 显示结束按钮（校准完成后调用）────────────────────
+  function showEndBtn() {
+    const btn = document.getElementById('end-btn');
+    btn.style.display = 'flex';
+  }
+
+  // ── 结束会话 ─────────────────────────────────────────
+  let snapshotRects = {}; // 关闭前快照一份 zoneRects
+  function endSession() {
+    interactionEnabled = false;
+    canvasLoopRunning = false;
+    // 在 overlay 显示前先快照当前屏幕坐标
+    snapshotRects = {};
+    for (const id in zoneState) {
+      const el = document.getElementById(id);
+      if (el) {
+        const r = el.getBoundingClientRect();
+        snapshotRects[id] = { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
+      }
+    }
+    document.getElementById('end-btn').style.display = 'none';
+    document.getElementById('gaze-canvas').style.display = 'none';
+    document.getElementById('admin-toggle').style.display = 'none';
+    const overlay = document.getElementById('analysis-overlay');
+    overlay.classList.add('visible');
+    const dur = gazeLog.length > 0
+      ? ((gazeLog[gazeLog.length-1].t - gazeLog[0].t) / 1000).toFixed(1)
+      : '0';
+    document.getElementById('session-duration-label').textContent = `セッション時間: ${dur}秒`;
+    // 延迟确保布局完成后再渲染
+    setTimeout(() => {
+      renderHeatmap();
+      renderTimeline();
+      renderTable();
+    }, 80);
+  }
+
+  // ── tab切换 ─────────────────────────────────────────
+  function switchTab(name) {
+    ['heatmap','timeline','stats'].forEach(n => {
+      document.getElementById('tab-' + n).classList.toggle('active', n === name);
+      document.getElementById('pane-' + n).classList.toggle('active', n === name);
+    });
+    // 切換后重绘，确保 canvas 尺寸正确
+    if (name === 'heatmap')  requestAnimationFrame(renderHeatmap);
+    if (name === 'timeline') requestAnimationFrame(renderTimeline);
+  }
+
+  // ── 热力图（以实际标识区域直方形为背景）─────────────────
+  function fillRoundedRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+
+  function renderHeatmap() {
+    const wrap   = document.getElementById('heatmap-wrap');
+    const canvas = document.getElementById('heatmap-canvas');
+
+    const W = wrap.clientWidth  || 700;
+    const H = wrap.clientHeight || 420;
+    canvas.width  = W;
+    canvas.height = H;
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    // ─ step1: 用区域坐标绘制标识卡片布局背景 ─
+    // 优先用快照，若快照为空则直接重新读取（overlay 遮罩下元素仍在 DOM 中）
+    const rectsToUse = Object.keys(snapshotRects).length > 0
+      ? snapshotRects
+      : (() => {
+          const m = {};
+          for (const id in zoneState) {
+            const el = document.getElementById(id);
+            if (el) {
+              const r = el.getBoundingClientRect();
+              m[id] = { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
+            }
+          }
+          return m;
+        })();
+
+    const SW = window.innerWidth;
+    const SH = window.innerHeight;
+    const scale = Math.min(W / SW, H / SH);
+    const offX  = (W - SW * scale) / 2;
+    const offY  = (H - SH * scale) / 2;
+    const toC = (sx, sy) => [offX + sx * scale, offY + sy * scale];
+
+    ctx.fillStyle = '#0d1a0e';
+    ctx.fillRect(0, 0, W, H);
+
+    for (const id in rectsToUse) {
+      const r = rectsToUse[id];
+      const [x1, y1] = toC(r.left, r.top);
+      const bw = (r.width  || r.right  - r.left) * scale;
+      const bh = (r.height || r.bottom - r.top)  * scale;
+      if (bw < 2 || bh < 2) continue;
+      const color = ZONE_COLORS[id] || '#4CAF50';
+
+      ctx.fillStyle = color + '30';
+      fillRoundedRect(ctx, x1, y1, bw, bh, 4);
+      ctx.fill();
+
+      ctx.strokeStyle = color + '80';
+      ctx.lineWidth = 1.5;
+      fillRoundedRect(ctx, x1, y1, bw, bh, 4);
+      ctx.stroke();
+
+      ctx.fillStyle = color + 'ee';
+      const fs = Math.max(9, Math.min(15, Math.round(bh * 0.2)));
+      ctx.font = `bold ${fs}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(zoneNames[id], x1 + bw / 2, y1 + bh / 2);
+    }
+
+    if (gazeLog.length === 0) {
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('データなし', W/2, H/2);
+      return;
+    }
+
+    // ─ step2: 离屏 canvas 绘制高斯热力 ─
+    const offscreen = document.createElement('canvas');
+    offscreen.width  = W;
+    offscreen.height = H;
+    const octx = offscreen.getContext('2d');
+    const radius = Math.max(24, Math.min(80, W * 0.06));
+    for (const pt of gazeLog) {
+      const [px, py] = toC(pt.x, pt.y);
+      const grad = octx.createRadialGradient(px, py, 0, px, py, radius);
+      grad.addColorStop(0,   'rgba(255,255,255,0.5)');
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.18)');
+      grad.addColorStop(1,   'rgba(255,255,255,0)');
+      octx.fillStyle = grad;
+      octx.fillRect(px - radius, py - radius, radius*2, radius*2);
+    }
+
+    // ─ step3: 灰度 → 热力色彩映射 ─
+    const idata = octx.getImageData(0, 0, W, H);
+    const odata = ctx.createImageData(W, H);
+    for (let i = 0; i < idata.data.length; i += 4) {
+      const v = idata.data[i];
+      if (v < 4) continue;
+      const t = Math.min(v / 180, 1);
+      let rr, gg, bb, aa;
+      if (t < 0.25) {
+        rr = 0; gg = 0; bb = Math.round(180 + 75*(t/0.25)); aa = Math.round(t/0.25 * 160);
+      } else if (t < 0.5) {
+        const p = (t-0.25)/0.25;
+        rr = 0; gg = Math.round(255*p); bb = Math.round(255*(1-p)); aa = 180;
+      } else if (t < 0.75) {
+        const p = (t-0.5)/0.25;
+        rr = Math.round(255*p); gg = 255; bb = 0; aa = 200;
+      } else {
+        const p = (t-0.75)/0.25;
+        rr = 255; gg = Math.round(255*(1-p)); bb = 0; aa = 220;
+      }
+      odata.data[i]   = rr;
+      odata.data[i+1] = gg;
+      odata.data[i+2] = bb;
+      odata.data[i+3] = aa;
+    }
+    // 将热力写入第二个离屏 canvas，再叠加到主 canvas（保留区域矩形背景）
+    const heatCanvas = document.createElement('canvas');
+    heatCanvas.width  = W;
+    heatCanvas.height = H;
+    const hctx = heatCanvas.getContext('2d');
+    hctx.putImageData(odata, 0, 0);
+    ctx.drawImage(heatCanvas, 0, 0);
+  }
+
+  // ── 时序图 ────────────────────────────────────────────
+  function renderTimeline() {
+    const canvas = document.getElementById('timeline-canvas');
+    const legend = document.getElementById('timeline-legend');
+
+    // 构建图例
+    legend.innerHTML = '';
+    for (const id in ZONE_COLORS) {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = `<span class="legend-dot" style="background:${ZONE_COLORS[id]}"></span>${zoneNames[id]}`;
+      legend.appendChild(item);
+    }
+
+    // 全屏高度布局：取父容器可用高度
+    const pane = document.getElementById('pane-timeline');
+    const W = canvas.clientWidth || 800;
+    // legend~30px, title~60px, padding~64px, desc~30px, gap~40px
+    const H = Math.max(200, pane.clientHeight - 200);
+    canvas.width  = W;
+    canvas.height = H;
+    canvas.style.height = H + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    if (gazeLog.length < 2) {
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('データが不足しています', W/2, H/2);
+      return;
+    }
+
+    const PAD = { top:16, right:16, bottom:28, left:36 };
+    const cW = W - PAD.left - PAD.right;
+    const cH = H - PAD.top  - PAD.bottom;
+
+    // 网格线
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = PAD.top + (cH / 4) * i;
+      ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cW, y); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(100 - i*25, PAD.left - 4, y + 4);
+    }
+
+    const t0   = gazeLog[0].t;
+    const tEnd = gazeLog[gazeLog.length-1].t;
+    const tRange = tEnd - t0 || 1;
+
+    // 时间轴刻度
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    for (let s = 0; s <= Math.ceil(tRange/1000); s += Math.max(1, Math.round(tRange/5000))) {
+      const x = PAD.left + (s * 1000 / tRange) * cW;
+      ctx.fillText(s + 's', x, H - 6);
+    }
+
+    // 折线
+    for (const id in ZONE_COLORS) {
+      ctx.beginPath();
+      ctx.strokeStyle = ZONE_COLORS[id];
+      ctx.lineWidth = 1.8;
+      ctx.globalAlpha = 0.85;
+      let first = true;
+      for (const pt of gazeLog) {
+        const x = PAD.left + ((pt.t - t0) / tRange) * cW;
+        const y = PAD.top  + (1 - pt.weights[id] / 100) * cH;
+        if (first) { ctx.moveTo(x, y); first = false; }
+        else        { ctx.lineTo(x, y); }
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── 统计表格 ──────────────────────────────────────────
+  function renderTable() {
+    const tbody = document.getElementById('stats-tbody');
+    tbody.innerHTML = '';
+
+    const LOG_INTERVAL_S = LOG_INTERVAL / 1000;
+    const totals   = {};
+    const maxWeights = {};
+    for (const id in zoneState) { totals[id] = 0; maxWeights[id] = 0; }
+
+    for (const pt of gazeLog) {
+      if (pt.zone) totals[pt.zone] = (totals[pt.zone] || 0) + LOG_INTERVAL_S;
+      for (const id in pt.weights) {
+        if (pt.weights[id] > (maxWeights[id] || 0)) maxWeights[id] = pt.weights[id];
+      }
+    }
+
+    const totalGaze = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
+
+    // 按注视时长降序排列
+    const sorted = Object.keys(zoneState).sort((a,b) => totals[b] - totals[a]);
+
+    for (const id of sorted) {
+      const sec = totals[id].toFixed(1);
+      const pct = ((totals[id] / totalGaze) * 100).toFixed(1);
+      const maxW = maxWeights[id].toFixed(0);
+      const color = ZONE_COLORS[id];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="zone-badge"><span class="legend-dot" style="background:${color};width:8px;height:8px;"></span>${zoneNames[id]}</span></td>
+        <td>${sec}s</td>
+        <td><span class="pct-bar-wrap"><span class="pct-bar-fill" style="width:${pct}%;background:${color};"></span></span>${pct}%</td>
+        <td>${maxW}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    // 摘要统计
+    const dur = gazeLog.length > 0
+      ? ((gazeLog[gazeLog.length-1].t - gazeLog[0].t) / 1000).toFixed(1)
+      : '0';
+    const topZone = sorted[0] ? zoneNames[sorted[0]] : '—';
+    const doc = document.getElementById('summary-stats');
+    doc.innerHTML = `
+      <div class="summary-chip"><div class="val">${dur}s</div><div class="lbl">セッション時間</div></div>
+      <div class="summary-chip"><div class="val">${gazeLog.length}</div><div class="lbl">サンプル数</div></div>
+      <div class="summary-chip"><div class="val" style="font-size:15px;">${topZone}</div><div class="lbl">最多注視ゾーン</div></div>
+      <div class="summary-chip"><div class="val">${Object.values(totals).filter(v=>v>0).length}/6</div><div class="lbl">注視ゾーン数</div></div>
+    `;
+  }
+
+  // ── 重新开始 ──────────────────────────────────────────
+  function restartSession() {
+    gazeLog = [];
+    sessionStart = null;
+    lastLogTime = 0;
+    gazeHistory.length = 0;
+    for (const id in zoneState) zoneState[id].weight = 0;
+    applyAllZoneEffects();
+    document.getElementById('analysis-overlay').classList.remove('visible');
+    document.getElementById('gaze-canvas').style.display = 'block';
+    document.getElementById('admin-toggle').style.display = 'flex';
+    document.getElementById('end-btn').style.display = 'flex';
+    canvasLoopRunning = true;
+    interactionEnabled = true;
+    (function canvasLoop() {
+      drawGazeCanvas();
+      if (canvasLoopRunning) requestAnimationFrame(canvasLoop);
+    })();
   }
 
 </script>
