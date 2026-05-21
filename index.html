@@ -265,39 +265,64 @@
     }
     .calib-point {
       position: fixed;
-      width: 30px; height: 30px;
-      background: var(--primary);
-      border: 3px solid white;
+      width: 64px; height: 64px;
+      background: #ffffff;
+      border: 5px solid #1B5E20;
       border-radius: 50%;
       transform: translate(-50%, -50%);
       cursor: pointer;
       pointer-events: all;
-      box-shadow: 0 0 0 6px rgba(76,175,80,0.25);
-      animation: pulse-dot 1.2s ease-in-out infinite;
-      transition: width 0.15s, height 0.15s, background 0.15s;
+      box-shadow: 0 0 0 8px #4CAF50, 0 0 0 14px rgba(76,175,80,0.35), 0 6px 24px rgba(0,0,0,0.35);
+      animation: pulse-dot 1.0s ease-in-out infinite;
+      transition: width 0.15s, height 0.15s, background 0.15s, box-shadow 0.15s;
       z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 900;
+      color: #1B5E20;
+      font-family: 'Noto Sans JP', sans-serif;
+      user-select: none;
     }
     @keyframes pulse-dot {
-      0%, 100% { box-shadow: 0 0 0 4px rgba(76,175,80,0.3); }
-      50%       { box-shadow: 0 0 0 12px rgba(76,175,80,0); }
+      0%, 100% { box-shadow: 0 0 0 8px #4CAF50, 0 0 0 14px rgba(76,175,80,0.35), 0 6px 24px rgba(0,0,0,0.35); }
+      50%       { box-shadow: 0 0 0 8px #4CAF50, 0 0 0 24px rgba(76,175,80,0),   0 6px 24px rgba(0,0,0,0.35); }
     }
-    .calib-point:active { transform: translate(-50%, -50%) scale(0.85); }
+    .calib-point:active { transform: translate(-50%, -50%) scale(0.88); }
 
     #calib-progress {
       position: fixed;
       top: 30px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
-      background: rgba(255,255,255,0.9);
-      color: var(--primary);
-      border: 1px solid var(--primary-light);
-      padding: 8px 24px;
+      background: rgba(255,255,255,0.96);
+      color: #1B5E20;
+      border: 2px solid #4CAF50;
+      padding: 10px 32px;
       border-radius: 30px;
       white-space: nowrap;
       z-index: 1010;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      letter-spacing: 0.02em;
+    }
+    #calib-key-hint {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      color: rgba(30,60,30,0.65);
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(76,175,80,0.3);
+      padding: 8px 24px;
+      border-radius: 20px;
+      z-index: 1010;
+      white-space: nowrap;
+      font-family: 'Noto Sans JP', sans-serif;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
     /* 隐藏 WebGazer 自带红色预测点 */
@@ -602,6 +627,65 @@
       padding: 18px 20px;
       text-align: center;
     }
+
+    /* ================= Step-0 署名入力 ================= */
+    #step-0 {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    #step-0 h1 {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 28px;
+      color: #1B5E20;
+      margin-bottom: 8px;
+    }
+    #step-0 .name-sub {
+      font-size: 15px;
+      color: #5a7c5d;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    .name-input-wrap {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .name-input-wrap label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #388E3C;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    #participant-name {
+      width: 100%;
+      font-size: 24px;
+      font-family: 'Noto Sans JP', sans-serif;
+      padding: 14px 18px;
+      border: 2px solid #A5D6A7;
+      border-radius: 12px;
+      outline: none;
+      background: #f8fff8;
+      color: #1B5E20;
+      box-sizing: border-box;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    #participant-name:focus {
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 4px rgba(76,175,80,0.15);
+      background: #fff;
+    }
+    #participant-name::placeholder { color: #b0c9b2; }
+    #name-error {
+      font-size: 13px;
+      color: #c62828;
+      margin-top: 6px;
+      min-height: 18px;
+    }
     .summary-chip .val {
       font-size: 28px;
       font-weight: bold;
@@ -782,7 +866,20 @@
 
   <!-- 校准遮罩 -->
   <div id="calibration-overlay">
-    <div id="step-1" class="calib-step active">
+
+    <!-- Step 0: 署名入力 -->
+    <div id="step-0" class="calib-step active">
+      <h1>🌿 ようこそ</h1>
+      <p class="name-sub">体験を始める前に、あなたのお名前またはニックネームを入力してください。<br>入力した名前は記録データに記載されます。</p>
+      <div class="name-input-wrap">
+        <label for="participant-name">お名前 / ニックネーム</label>
+        <input type="text" id="participant-name" placeholder="例：山田花子" maxlength="30" autocomplete="off">
+        <div id="name-error"></div>
+      </div>
+      <button class="btn-primary" id="btn-name-next" onclick="submitName()">次へ →</button>
+    </div>
+
+    <div id="step-1" class="calib-step">
       <h1>視線追跡の準備</h1>
       <p>カメラを使用して視線を追跡します。（映像は外部に送信されません）</p>
       <p id="saved-data-hint" style="display:none; color:#4CAF50; font-weight:bold;">✔ 前回のキャリブレーションデータが見つかりました。</p>
@@ -793,8 +890,9 @@
     </div>
 
     <div id="step-2" class="calib-step">
-      <div id="calib-progress">点滅している点をクリックしてください (0/9)</div>
+      <div id="calib-progress">点 1 / 9  ─  クリック 0 / 3</div>
       <div id="calib-points-container"></div>
+      <div id="calib-key-hint">💻 キーボードショートカット ─ 「Space」または「0」を押すで1回クリックと同じ効果</div>
     </div>
 
     <div id="step-3" class="calib-step">
@@ -883,6 +981,7 @@
   let gazeLog = [];        // [{x,y,t,zone,weights}, ...]
   let sessionStart = null;
   let lastLogTime = 0;
+  let participantName = '';  // 受测者署名
   const LOG_INTERVAL = 100; // ms，每100ms记一条
 
   const ZONE_COLORS = {
@@ -903,6 +1002,13 @@
   }, 1000);
 
   window.addEventListener('DOMContentLoaded', () => {
+    // 自动聚焦署名输入框
+    const nameInput = document.getElementById('participant-name');
+    if (nameInput) setTimeout(() => nameInput.focus(), 200);
+    // Enter键提交
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitName();
+    });
     try {
       const saved = localStorage.getItem('webgazerGlobalData');
       if (saved && JSON.parse(saved).data && JSON.parse(saved).data.length > 10) {
@@ -910,6 +1016,22 @@
       }
     } catch(e) {}
   });
+
+  function submitName() {
+    const input = document.getElementById('participant-name');
+    const errEl = document.getElementById('name-error');
+    const val = input.value.trim();
+    if (!val) {
+      errEl.textContent = '⚠ お名前を入力してください。';
+      input.focus();
+      return;
+    }
+    errEl.textContent = '';
+    participantName = val;
+    // 过渡到 step-1
+    document.getElementById('step-0').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
+  }
 
   function startDemoMode() {
     isDemoMode = true;
@@ -1011,7 +1133,7 @@
 
       // 显示校准点
       showNextCalibPoint();
-      progressEl.innerText = `点滅している点をクリックしてください (0/9)`;
+      startCalibKeyboard(); // 注册键盘快捷键
     }).catch(err => {
       // begin() 本身抛出的其他错误（模型加载失败等）
       console.error('WebGazer begin() エラー:', err);
@@ -1021,6 +1143,36 @@
         step1El.classList.add('active');
       }, 4000);
     });
+  }
+
+  // 校准点点击逻辑（鼠标点击和键盘共用此函数）
+  function doCalibClick() {
+    const pt = document.querySelector('.calib-point');
+    if (!pt) return;
+    currentPointClicks++;
+    const remaining = 3 - currentPointClicks;
+    pt.textContent = remaining > 0 ? remaining : '';
+
+    // 颜色由白→浅绿过渡，表示进度
+    const brightness = 100 - currentPointClicks * 18;
+    pt.style.background = `hsl(120, 70%, ${brightness}%)`;
+    pt.style.color = currentPointClicks >= 2 ? '#fff' : '#1B5E20';
+    pt.style.boxShadow = `0 0 0 ${8 - currentPointClicks*2}px #4CAF50, 0 0 0 ${14 - currentPointClicks*2}px rgba(76,175,80,0.3), 0 6px 24px rgba(0,0,0,0.35)`;
+
+    // 更新顶部进度提示
+    updateCalibProgress();
+
+    if (currentPointClicks >= 3) {
+      currentCalibIdx++;
+      setTimeout(showNextCalibPoint, 120);
+    }
+  }
+
+  function updateCalibProgress() {
+    const pointsDone = currentCalibIdx;
+    const clicksDone = Math.min(currentPointClicks, 3);
+    document.getElementById('calib-progress').innerText =
+      `👁 点 ${pointsDone + 1} / 9  ─  クリック ${clicksDone} / 3`;
   }
 
   function showNextCalibPoint() {
@@ -1033,34 +1185,41 @@
       return;
     }
 
-    document.getElementById('calib-progress').innerText = `点滅している点をクリックしてください (${currentCalibIdx}/9)`;
-    
+    updateCalibProgress();
+
     const [x, y] = calibPoints[currentCalibIdx];
     const pt = document.createElement('div');
     pt.className = 'calib-point';
     pt.style.left = x + 'vw';
     pt.style.top = y + 'vh';
-    pt.style.display = 'block';
-    
-    pt.onclick = () => {
-      currentPointClicks++;
-      const ratio = currentPointClicks / 3;
-      const size = Math.max(12, 30 - currentPointClicks * 6);
-      pt.style.width  = size + 'px';
-      pt.style.height = size + 'px';
-      pt.style.background = `hsl(120, 80%, ${60 - ratio*20}%)`;
-      if (currentPointClicks >= 3) {
-        currentCalibIdx++;
-        showNextCalibPoint();
-      }
-    };
+    pt.textContent = '3';
+    pt.onclick = doCalibClick;
     container.appendChild(pt);
   }
 
+  // 键盘快捷键（Space / 0）登录与注销
+  let _calibKeyHandler = null;
+  function startCalibKeyboard() {
+    _calibKeyHandler = (e) => {
+      if (e.code === 'Space' || e.key === '0' || e.code === 'Digit0' || e.code === 'Numpad0') {
+        e.preventDefault();
+        doCalibClick();
+      }
+    };
+    document.addEventListener('keydown', _calibKeyHandler);
+  }
+  function stopCalibKeyboard() {
+    if (_calibKeyHandler) {
+      document.removeEventListener('keydown', _calibKeyHandler);
+      _calibKeyHandler = null;
+    }
+  }
+
   function finishCalibration() {
+    stopCalibKeyboard(); // 注销键盘监听
     document.getElementById('step-2').classList.remove('active');
     document.getElementById('step-3').classList.add('active');
-    document.getElementById('calib-progress').innerText = `(9/9)`;
+    document.getElementById('calib-progress').innerText = `✔ キャリブレーション完了 (9/9)`;
     // 停留在 step-3 等待用户点击确认或重新校准
   }
 
@@ -1462,7 +1621,9 @@
     const dur = gazeLog.length > 0
       ? ((gazeLog[gazeLog.length-1].t - gazeLog[0].t) / 1000).toFixed(1)
       : '0';
-    document.getElementById('session-duration-label').textContent = `セッション時間: ${dur}秒`;
+    // 标题显示受测者名字
+    const nameLabel = participantName ? ` — ${participantName}` : '';
+    document.getElementById('session-duration-label').textContent = `${nameLabel}  ｜  セッション時間: ${dur}秒`;
     // 延迟确保布局完成后再渲染
     setTimeout(() => {
       renderHeatmap();
@@ -1745,14 +1906,57 @@
     const topZone = sorted[0] ? zoneNames[sorted[0]] : '—';
     const doc = document.getElementById('summary-stats');
     doc.innerHTML = `
+      <div class="summary-chip"><div class="val" style="font-size:18px;">${participantName || '—'}</div><div class="lbl">受测者</div></div>
       <div class="summary-chip"><div class="val">${dur}s</div><div class="lbl">セッション時間</div></div>
       <div class="summary-chip"><div class="val">${gazeLog.length}</div><div class="lbl">サンプル数</div></div>
       <div class="summary-chip"><div class="val" style="font-size:15px;">${topZone}</div><div class="lbl">最多注視ゾーン</div></div>
-      <div class="summary-chip"><div class="val">${Object.values(totals).filter(v=>v>0).length}/6</div><div class="lbl">注視ゾーン数</div></div>
     `;
+    // 导出按鈕
+    const existingBtn = document.getElementById('export-json-btn');
+    if (!existingBtn) {
+      const exportBtn = document.createElement('button');
+      exportBtn.id = 'export-json-btn';
+      exportBtn.className = 'btn-primary';
+      exportBtn.style.cssText = 'margin-top:20px; background:#1B5E20; font-size:15px; padding:10px 28px;';
+      exportBtn.textContent = '↓ JSONデータをエクスポート';
+      exportBtn.onclick = exportSessionJSON;
+      document.getElementById('pane-stats').appendChild(exportBtn);
+    }
   }
 
-  // ── 重新开始 ──────────────────────────────────────────
+  // ── JSON导出 ────────────────────────────────────────────────
+  function exportSessionJSON() {
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    const payload = {
+      meta: {
+        participant: participantName || 'anonymous',
+        exportedAt: new Date().toISOString(),
+        sessionDurationSec: gazeLog.length > 0
+          ? +((gazeLog[gazeLog.length-1].t - gazeLog[0].t) / 1000).toFixed(2)
+          : 0,
+        sampleCount: gazeLog.length,
+        settings: { ...settings }
+      },
+      gazeLog: gazeLog.map(p => ({
+        t_ms: Math.round(p.t - (gazeLog[0]?.t || 0)),
+        x: Math.round(p.x),
+        y: Math.round(p.y),
+        zone: p.zone || null,
+        weights: Object.fromEntries(
+          Object.entries(p.weights).map(([k, v]) => [k, +v.toFixed(1)])
+        )
+      }))
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gaze_${participantName || 'anonymous'}_${ts}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── 重新开始 ────────────────────────────────────────────────
   function restartSession() {
     gazeLog = [];
     sessionStart = null;
@@ -1761,6 +1965,18 @@
     for (const id in zoneState) zoneState[id].weight = 0;
     applyAllZoneEffects();
     document.getElementById('analysis-overlay').classList.remove('visible');
+    // 回到署名页重新输入
+    const exportBtn = document.getElementById('export-json-btn');
+    if (exportBtn) exportBtn.remove();
+    document.getElementById('participant-name').value = '';
+    document.getElementById('name-error').textContent = '';
+    participantName = '';
+    document.getElementById('step-0').classList.add('active');
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('calibration-overlay').style.opacity = '1';
+    document.getElementById('calibration-overlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('participant-name').focus(), 200);
+    // 重启 Canvas循环
     document.getElementById('gaze-canvas').style.display = 'block';
     document.getElementById('admin-toggle').style.display = 'flex';
     document.getElementById('end-btn').style.display = 'flex';
