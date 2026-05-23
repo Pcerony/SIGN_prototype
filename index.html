@@ -235,7 +235,7 @@
     }
     .calib-step { display: none; text-align: center; }
     .calib-step.active { display: block; }
-    #step-2.active {
+    #step-3.active {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -463,7 +463,15 @@
       letter-spacing: 0.05em;
     }
     .analysis-header h1 span { font-size: 14px; color: #81c784; margin-left: 12px; font-family: 'Noto Sans JP', sans-serif; }
-    #btn-restart {
+    .analysis-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    #btn-restart,
+    #btn-export-archive {
       background: rgba(76,175,80,0.2);
       color: #a5d6a7;
       border: 1px solid rgba(129,199,132,0.4);
@@ -474,7 +482,12 @@
       font-family: 'Noto Sans JP', sans-serif;
       transition: background 0.3s;
     }
-    #btn-restart:hover { background: rgba(76,175,80,0.4); }
+    #btn-export-archive {
+      background: rgba(129,199,132,0.26);
+      color: #e8f5e9;
+    }
+    #btn-restart:hover,
+    #btn-export-archive:hover { background: rgba(76,175,80,0.4); }
 
     /* ── tab导航栏 ── */
     .analysis-tabs {
@@ -685,6 +698,122 @@
       color: #c62828;
       margin-top: 6px;
       min-height: 18px;
+    }
+    .archive-import {
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(76,175,80,0.18);
+    }
+    .archive-import button {
+      width: 100%;
+      background: rgba(27,94,32,0.08);
+      color: #1B5E20;
+      border: 1px solid rgba(76,175,80,0.35);
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Noto Sans JP', sans-serif;
+      cursor: pointer;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .archive-import button:hover {
+      background: rgba(76,175,80,0.14);
+      border-color: rgba(76,175,80,0.55);
+    }
+    #archive-import-status {
+      min-height: 18px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #5a7c5d;
+      line-height: 1.5;
+    }
+    .posture-guide,
+    .camera-adjust-panel {
+      width: min(900px, calc(100vw - 40px));
+      margin: 0 auto;
+    }
+    .posture-guide img {
+      display: block;
+      max-width: min(760px, 90vw);
+      max-height: 58vh;
+      object-fit: contain;
+      margin: 22px auto 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(76,175,80,0.18);
+      background: rgba(255,255,255,0.65);
+      box-shadow: 0 10px 30px rgba(27,94,32,0.12);
+    }
+    .posture-guide p,
+    .camera-adjust-panel p {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #446a47;
+      margin: 12px auto;
+    }
+    .camera-select-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      margin: 18px auto 14px;
+      flex-wrap: wrap;
+    }
+    .camera-select-row label {
+      color: #388E3C;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+    }
+    #camera-select {
+      min-width: min(380px, 84vw);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(76,175,80,0.45);
+      background: #f8fff8;
+      color: #1B5E20;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 15px;
+    }
+    .camera-preview-frame {
+      width: min(640px, 86vw);
+      aspect-ratio: 16 / 9;
+      margin: 14px auto 8px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #102414;
+      border: 2px solid rgba(76,175,80,0.35);
+      box-shadow: 0 12px 30px rgba(27,94,32,0.18);
+      position: relative;
+    }
+    #camera-preview-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      display: block;
+    }
+    .camera-preview-crosshair {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, transparent calc(50% - 1px), rgba(165,214,167,0.75) 50%, transparent calc(50% + 1px)),
+        linear-gradient(to bottom, transparent calc(50% - 1px), rgba(165,214,167,0.75) 50%, transparent calc(50% + 1px));
+    }
+    .camera-adjust-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    #camera-adjust-status {
+      min-height: 20px;
+      margin-top: 10px;
+      color: #5a7c5d;
+      font-size: 13px;
+      line-height: 1.5;
     }
     .summary-chip .val {
       font-size: 28px;
@@ -1005,7 +1134,10 @@
   <div id="analysis-overlay">
     <div class="analysis-header">
       <h1>📊 視線追跡レポート <span id="session-duration-label"></span></h1>
-      <button id="btn-restart" onclick="restartSession()">↩ もう一度やり直す</button>
+      <div class="analysis-header-actions">
+        <button id="btn-export-archive" onclick="exportSessionArchive()">↓ アーカイブを書き出す</button>
+        <button id="btn-restart" onclick="restartSession()">↩ もう一度やり直す</button>
+      </div>
     </div>
     <!-- tab导航 -->
     <div class="analysis-tabs">
@@ -1159,25 +1291,51 @@
         <div id="name-error"></div>
       </div>
       <button class="btn-primary" id="btn-name-next" onclick="submitName()">次へ →</button>
+      <div class="archive-import">
+        <input type="file" id="archive-file-input" accept=".json,application/json" onchange="loadArchiveFromHome(event)" style="display:none;">
+        <button type="button" onclick="document.getElementById('archive-file-input').click()">保存済みアーカイブを読み込む</button>
+        <div id="archive-import-status"></div>
+      </div>
     </div>
 
     <div id="step-1" class="calib-step">
-      <h1>視線追跡の準備</h1>
-      <p>カメラを使用して視線を追跡します。（映像は外部に送信されません）</p>
-      <p id="saved-data-hint" style="display:none; color:#4CAF50; font-weight:bold;">✔ 前回のキャリブレーションデータが見つかりました。</p>
-      <button class="btn-primary" onclick="startCalibration()">📷 カメラを許可してキャリブレーション開始</button>
-      <br>
-      <button class="btn-primary" onclick="startDemoMode()" style="margin-top:12px; background:#757575;">🖱️ マウスでデモ（カメラ不要）</button>
-      <p style="font-size:12px; color:#888; margin-top:16px;">マウスモードではマウスカーソルの位置が注視点として扱われます</p>
+      <div class="posture-guide">
+        <h1>立ち位置を調整</h1>
+        <img src="./A1.png" alt="姿勢と距離の調整例">
+        <p>姿勢と距離を調整してください。調整後は、できるだけ大きく動かないでください。</p>
+        <button class="btn-primary" id="btn-posture-next" onclick="confirmPostureAdjustment()">調整完了</button>
+      </div>
     </div>
 
     <div id="step-2" class="calib-step">
-      <div id="calib-progress">点 1 / 9  ─  クリック 0 / 3</div>
+      <div class="camera-adjust-panel">
+        <h1>カメラの選択と調整</h1>
+        <p>実験担当者は使用するカメラを選択し、受験者の目が画面の中央付近に映るようにカメラ角度を調整してください。</p>
+        <div class="camera-select-row">
+          <label for="camera-select">使用カメラ</label>
+          <select id="camera-select" onchange="onCameraSelectionChange()">
+            <option value="">カメラを読み込み中...</option>
+          </select>
+        </div>
+        <div class="camera-preview-frame">
+          <video id="camera-preview-video" autoplay muted playsinline></video>
+          <div class="camera-preview-crosshair"></div>
+        </div>
+        <div id="camera-adjust-status"></div>
+        <div class="camera-adjust-actions">
+          <button class="btn-primary" onclick="refreshCameraDevices()" style="background:#757575;">カメラ一覧を更新</button>
+          <button class="btn-primary" onclick="startCalibration()">キャリブレーションへ進む</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="step-3" class="calib-step">
+      <div id="calib-progress">点 1 / 13  ─  クリック 0 / 3</div>
       <div id="calib-points-container"></div>
       <div id="calib-key-hint">💻 キーボードショートカット ─ 「Space」または「0」を押すで1回クリックと同じ効果</div>
     </div>
 
-    <div id="step-3" class="calib-step">
+    <div id="step-4" class="calib-step">
       <h1 style="color: #4CAF50;">✔ キャリブレーション完了！</h1>
       <p>現在、視線の動きをプレビューしています。画面上の光の輪が視線の動きに追従するか確認してください。</p>
       <div style="margin-top: 24px;">
@@ -1252,9 +1410,7 @@
   let smoothX = window.innerWidth / 2;
   let smoothY = window.innerHeight / 2;
   let isCalibrated = false;
-  let isDemoMode = false;
   let interactionEnabled = false;
-  let demoMouseMoveHandler = null; // 保持对鼠标模拟事件监听器的引用
   let mainLoopRunning = false;     // mainLoop 运行状态守护
 
   // 注视轨迹缓冲区：保存过去 2 秒内所有平滑坐标
@@ -1266,7 +1422,10 @@
   let sessionStart = null;
   let lastLogTime = 0;
   let participantName = '';  // 受测者署名
+  let archiveViewport = null;
   const LOG_INTERVAL = 100; // ms，每100ms记一条
+  const ARCHIVE_TYPE = 'SIGN_GAZE_PRO';
+  const ARCHIVE_VERSION = 1;
 
   // ── 新增：背景多模态渲染与回放系统全局变量 ──
   let customHeatmapImg = null;
@@ -1306,12 +1465,8 @@
     nameInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') submitName();
     });
-    try {
-      const saved = localStorage.getItem('webgazerGlobalData');
-      if (saved && JSON.parse(saved).data && JSON.parse(saved).data.length > 10) {
-        document.getElementById('saved-data-hint').style.display = 'block';
-      }
-    } catch(e) {}
+    localStorage.removeItem('webgazerGlobalData');
+    localStorage.removeItem('webgazerGlobalSettings');
   });
 
   function submitName() {
@@ -1328,34 +1483,7 @@
     // 过渡到 step-1
     document.getElementById('step-0').classList.remove('active');
     document.getElementById('step-1').classList.add('active');
-  }
-
-  function startDemoMode() {
-    isDemoMode = true;
-    isCalibrated = true;
-    document.getElementById('calibration-overlay').style.opacity = '0';
-    document.getElementById('calibration-overlay').style.transition = 'opacity 0.5s';
-    setTimeout(() => {
-      document.getElementById('calibration-overlay').style.display = 'none';
-      if (settings.showGazeDot) showGazeCanvas();
-      for (const id in zoneState) {
-        const el = document.getElementById(id);
-        if (el) zoneRects[id] = el.getBoundingClientRect();
-      }
-      
-      // 移除旧的监听器，防止多次叠加
-      if (demoMouseMoveHandler) {
-        document.removeEventListener('mousemove', demoMouseMoveHandler);
-      }
-      demoMouseMoveHandler = (e) => {
-        onGaze(e.clientX, e.clientY);
-      };
-      document.addEventListener('mousemove', demoMouseMoveHandler);
-      
-      startMainLoop();
-      interactionEnabled = true; // 鼠标模拟模式不需要冷却
-      showEndBtn();
-    }, 500);
+    setTimeout(() => document.getElementById('btn-posture-next')?.focus(), 80);
   }
 
   let canvasLoopRunning = false;
@@ -1380,25 +1508,162 @@
     }
   }
 
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  const CALIBRATION_CLICKS_PER_POINT = 3;
   const calibPoints = [
-    [10, 10], [50, 10], [90, 10],
-    [10, 50], [50, 50], [90, 50],
-    [10, 90], [50, 90], [90, 90]
+    [8, 8], [50, 8], [92, 8],
+    [26, 26], [74, 26],
+    [8, 50], [50, 50], [92, 50],
+    [26, 74], [74, 74],
+    [8, 92], [50, 92], [92, 92]
   ];
   let currentCalibIdx = 0;
   let currentPointClicks = 0;
+  let calibrationSampleCount = 0;
+  let selectedCameraDeviceId = '';
+  let cameraPreviewStream = null;
 
-  function startCalibration() {
+  function getCameraVideoConstraints() {
+    const video = {
+      facingMode: 'user',
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      frameRate: { ideal: 30, max: 30 }
+    };
+    if (selectedCameraDeviceId) {
+      video.deviceId = { exact: selectedCameraDeviceId };
+      delete video.facingMode;
+    }
+    return { video, audio: false };
+  }
+
+  function stopCameraPreview() {
+    if (cameraPreviewStream) {
+      cameraPreviewStream.getTracks().forEach(track => track.stop());
+      cameraPreviewStream = null;
+    }
+    const video = document.getElementById('camera-preview-video');
+    if (video) video.srcObject = null;
+  }
+
+  async function populateCameraSelect(preferredDeviceId = selectedCameraDeviceId) {
+    const select = document.getElementById('camera-select');
+    if (!select || !navigator.mediaDevices?.enumerateDevices) return;
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter(device => device.kind === 'videoinput');
+    select.innerHTML = '';
+
+    if (cameras.length === 0) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = 'カメラが見つかりません';
+      select.appendChild(option);
+      selectedCameraDeviceId = '';
+      return;
+    }
+
+    cameras.forEach((device, index) => {
+      const option = document.createElement('option');
+      option.value = device.deviceId;
+      option.textContent = device.label || `カメラ ${index + 1}`;
+      select.appendChild(option);
+    });
+
+    const nextDeviceId = cameras.some(device => device.deviceId === preferredDeviceId)
+      ? preferredDeviceId
+      : cameras[0].deviceId;
+    select.value = nextDeviceId;
+    selectedCameraDeviceId = nextDeviceId;
+  }
+
+  async function startCameraPreview() {
+    const status = document.getElementById('camera-adjust-status');
+    const video = document.getElementById('camera-preview-video');
+    if (!navigator.mediaDevices?.getUserMedia) {
+      if (status) status.textContent = 'このブラウザではカメラを利用できません。';
+      return;
+    }
+
+    stopCameraPreview();
+    if (status) status.textContent = 'カメラを起動しています...';
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(getCameraVideoConstraints());
+      cameraPreviewStream = stream;
+      if (video) {
+        video.srcObject = stream;
+        await video.play().catch(() => {});
+      }
+      const trackDeviceId = stream.getVideoTracks()[0]?.getSettings?.().deviceId;
+      if (trackDeviceId) selectedCameraDeviceId = trackDeviceId;
+      await populateCameraSelect(selectedCameraDeviceId);
+      if (status) status.textContent = '目が中央のガイド付近に映るようにカメラ角度を調整してください。';
+    } catch (err) {
+      console.error('Camera preview failed:', err);
+      if (status) {
+        if (err && err.name === 'NotAllowedError') {
+          status.textContent = 'カメラ権限が拒否されています。ブラウザでカメラを許可してください。';
+        } else if (err && err.name === 'NotFoundError') {
+          status.textContent = '利用できるカメラが見つかりません。';
+        } else {
+          status.textContent = `カメラを起動できませんでした: ${err && err.message ? err.message : err}`;
+        }
+      }
+      await populateCameraSelect('');
+    }
+  }
+
+  async function initCameraAdjustment() {
+    const status = document.getElementById('camera-adjust-status');
+    if (status) status.textContent = 'カメラ一覧を取得しています...';
+    try {
+      await populateCameraSelect(selectedCameraDeviceId);
+    } catch (err) {
+      console.warn('Camera list warning:', err);
+    }
+    await startCameraPreview();
+  }
+
+  function confirmPostureAdjustment() {
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    initCameraAdjustment();
+  }
+
+  function refreshCameraDevices() {
+    initCameraAdjustment();
+  }
+
+  function onCameraSelectionChange() {
+    const select = document.getElementById('camera-select');
+    selectedCameraDeviceId = select?.value || '';
+    startCameraPreview();
+  }
+
+  async function startCalibration() {
     const progressEl = document.getElementById('calib-progress');
-    const step1El = document.getElementById('step-1');
-    const step2El = document.getElementById('step-2');
+    const cameraStepEl = document.getElementById('step-2');
+    const calibStepEl = document.getElementById('step-3');
 
-    step1El.classList.remove('active');
-    step2El.classList.add('active');
+    cameraStepEl.classList.remove('active');
+    calibStepEl.classList.add('active');
     progressEl.innerText = '📷 カメラを起動中...';
+    stopCameraPreview();
 
-    // v3.x 正确用法：分步调用，不链式，让 WebGazer 自己管理摄像头
-    window.saveDataAcrossSessions = true;
+    // 新しい姿勢・カメラ位置ごとに新規キャリブレーションする。古い回帰データは精度を大きく落とす。
+    try {
+      webgazer.saveDataAcrossSessions(false);
+      localStorage.removeItem('webgazerGlobalData');
+      localStorage.removeItem('webgazerGlobalSettings');
+      await webgazer.clearData();
+      webgazer.applyKalmanFilter(true);
+      await webgazer.setCameraConstraints(getCameraVideoConstraints());
+    } catch (err) {
+      console.warn('WebGazer setup warning:', err);
+    }
+
     webgazer.setRegression('ridge');
     webgazer.setGazeListener((data, elapsed) => {
       if (!data) return;
@@ -1422,10 +1687,11 @@
           } else {
             msg += `エラー: ${err ? (err.name + ' — ' + err.message) : '不明'}`;
           }
-          progressEl.innerHTML = msg + '<br><br>👇 マウスモードを使用してください。';
+          progressEl.innerHTML = msg + '<br><br>カメラ設定を確認して、もう一度お試しください。';
           setTimeout(() => {
-            step2El.classList.remove('active');
-            step1El.classList.add('active');
+            calibStepEl.classList.remove('active');
+            cameraStepEl.classList.add('active');
+            initCameraAdjustment();
           }, 4000);
         }
       );
@@ -1437,41 +1703,93 @@
         webgazer.showVideoPreview(true);
         webgazer.showFaceOverlay(false);
         webgazer.showFaceFeedbackBox(false);
+        // WebGazer の document click 記録は確認ボタンなども学習してしまうため使わない。
+        webgazer.removeMouseEventListeners();
         // 校准阶段展示 canvas，让用户实时看到轨迹反馈
         showGazeCanvas();
 
+        currentCalibIdx = 0;
+        currentPointClicks = 0;
+        calibrationSampleCount = 0;
+        hasSmoothedGaze = false;
+        lastAcceptedGaze = null;
         // 显示校准点
         showNextCalibPoint();
         startCalibKeyboard(); // 注册键盘快捷键
       }).catch(err => {
         // begin() 本身抛出的其他错误（模型加载失败等）
         console.error('WebGazer begin() エラー:', err);
-        progressEl.innerHTML = `⚠ モデルの読み込みに失敗しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>👇 マウスモードを使用してください。`;
+        progressEl.innerHTML = `⚠ モデルの読み込みに失敗しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>カメラ設定を確認して、もう一度お試しください。`;
         setTimeout(() => {
-          step2El.classList.remove('active');
-          step1El.classList.add('active');
+          calibStepEl.classList.remove('active');
+          cameraStepEl.classList.add('active');
+          initCameraAdjustment();
         }, 4000);
       });
     } catch (err) {
       console.error('WebGazer begin() 例外:', err);
-      progressEl.innerHTML = `⚠ カメラの起動中に例外が発生しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>👇 マウスモードを使用してください。`;
+      progressEl.innerHTML = `⚠ カメラの起動中に例外が発生しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>カメラ設定を確認して、もう一度お試しください。`;
       setTimeout(() => {
-        step2El.classList.remove('active');
-        step1El.classList.add('active');
+        calibStepEl.classList.remove('active');
+        cameraStepEl.classList.add('active');
+        initCameraAdjustment();
       }, 4000);
     }
+  }
+
+  function getCurrentCalibrationTarget() {
+    const [vx, vy] = calibPoints[currentCalibIdx] || [50, 50];
+    return {
+      x: clamp((vx / 100) * window.innerWidth, 0, window.innerWidth),
+      y: clamp((vy / 100) * window.innerHeight, 0, window.innerHeight)
+    };
+  }
+
+  function getCalibrationDataCount() {
+    try {
+      return webgazer.getRegression?.()[0]?.getData?.()?.length || 0;
+    } catch (err) {
+      return calibrationSampleCount;
+    }
+  }
+
+  function recordCalibrationSample() {
+    if (!webgazer || typeof webgazer.recordScreenPosition !== 'function') return false;
+    const target = getCurrentCalibrationTarget();
+    const before = getCalibrationDataCount();
+    try {
+      webgazer.recordScreenPosition(target.x, target.y, 'click');
+      const after = getCalibrationDataCount();
+      if (after > before) {
+        calibrationSampleCount = after;
+        return true;
+      }
+    } catch (err) {
+      console.warn('Calibration sample was not recorded:', err);
+    }
+    return false;
   }
 
   // 校准点点击逻辑（鼠标点击和键盘共用此函数）
   function doCalibClick() {
     const pt = document.querySelector('.calib-point');
     if (!pt) return;
+    if (!recordCalibrationSample()) {
+      pt.textContent = '!';
+      pt.style.background = '#fff3cd';
+      pt.style.color = '#8a5a00';
+      document.getElementById('calib-progress').innerText =
+        '顔と目が検出されるまで少し待ってから、もう一度クリックしてください。';
+      setTimeout(updateCalibProgress, 900);
+      return;
+    }
     currentPointClicks++;
-    const remaining = 3 - currentPointClicks;
+    const remaining = CALIBRATION_CLICKS_PER_POINT - currentPointClicks;
     pt.textContent = remaining > 0 ? remaining : '';
 
     // 颜色由白→浅绿过渡，表示进度
-    const brightness = 100 - currentPointClicks * 18;
+    const progressRatio = currentPointClicks / CALIBRATION_CLICKS_PER_POINT;
+    const brightness = 100 - progressRatio * 54;
     pt.style.background = `hsl(120, 70%, ${brightness}%)`;
     pt.style.color = currentPointClicks >= 2 ? '#fff' : '#1B5E20';
     pt.style.boxShadow = `0 0 0 ${8 - currentPointClicks*2}px #4CAF50, 0 0 0 ${14 - currentPointClicks*2}px rgba(76,175,80,0.3), 0 6px 24px rgba(0,0,0,0.35)`;
@@ -1479,7 +1797,7 @@
     // 更新顶部进度提示
     updateCalibProgress();
 
-    if (currentPointClicks >= 3) {
+    if (currentPointClicks >= CALIBRATION_CLICKS_PER_POINT) {
       currentCalibIdx++;
       setTimeout(showNextCalibPoint, 120);
     }
@@ -1487,9 +1805,9 @@
 
   function updateCalibProgress() {
     const pointsDone = currentCalibIdx;
-    const clicksDone = Math.min(currentPointClicks, 3);
+    const clicksDone = Math.min(currentPointClicks, CALIBRATION_CLICKS_PER_POINT);
     document.getElementById('calib-progress').innerText =
-      `👁 点 ${pointsDone + 1} / 9  ─  クリック ${clicksDone} / 3`;
+      `👁 点 ${Math.min(pointsDone + 1, calibPoints.length)} / ${calibPoints.length}  ─  クリック ${clicksDone} / ${CALIBRATION_CLICKS_PER_POINT}`;
   }
 
   function showNextCalibPoint() {
@@ -1509,7 +1827,7 @@
     pt.className = 'calib-point';
     pt.style.left = x + 'vw';
     pt.style.top = y + 'vh';
-    pt.textContent = '3';
+    pt.textContent = String(CALIBRATION_CLICKS_PER_POINT);
     pt.onclick = doCalibClick;
     container.appendChild(pt);
   }
@@ -1534,10 +1852,10 @@
 
   function finishCalibration() {
     stopCalibKeyboard(); // 注销键盘监听
-    document.getElementById('step-2').classList.remove('active');
-    document.getElementById('step-3').classList.add('active');
-    document.getElementById('calib-progress').innerText = `✔ キャリブレーション完了 (9/9)`;
-    // 停留在 step-3 等待用户点击确认或重新校准
+    document.getElementById('step-3').classList.remove('active');
+    document.getElementById('step-4').classList.add('active');
+    document.getElementById('calib-progress').innerText = `✔ キャリブレーション完了 (${calibPoints.length}/${calibPoints.length})`;
+    // 停留在 step-4 等待用户点击确认或重新校准
   }
 
   function confirmCalibration() {
@@ -1547,6 +1865,8 @@
       document.getElementById('calibration-overlay').style.display = 'none';
       isCalibrated = true;
       gazeHistory.length = 0;
+      hasSmoothedGaze = false;
+      lastAcceptedGaze = null;
       for (const id in zoneState) { zoneState[id].weight = 0; }
       applyAllZoneEffects();
       if (!settings.showGazeDot) {
@@ -1568,11 +1888,21 @@
     }, 1000);
   }
 
-  function recalibrate() {
+  async function recalibrate() {
     currentCalibIdx = 0;
     currentPointClicks = 0;
-    document.getElementById('step-3').classList.remove('active');
-    document.getElementById('step-2').classList.add('active');
+    calibrationSampleCount = 0;
+    hasSmoothedGaze = false;
+    lastAcceptedGaze = null;
+    try {
+      await webgazer.clearData();
+      webgazer.setRegression('ridge');
+      webgazer.removeMouseEventListeners();
+    } catch (err) {
+      console.warn('Recalibration reset warning:', err);
+    }
+    document.getElementById('step-4').classList.remove('active');
+    document.getElementById('step-3').classList.add('active');
     showNextCalibPoint();
   }
   // 将历史注视点拟合为一个有机闭合轮廓（玻璃水珠效果）
@@ -1652,9 +1982,30 @@
     }
   }
 
+  let hasSmoothedGaze = false;
+  let lastAcceptedGaze = null;
+
   function onGaze(rawX, rawY) {
-    smoothX = smoothX * (1 - settings.smoothing) + rawX * settings.smoothing;
-    smoothY = smoothY * (1 - settings.smoothing) + rawY * settings.smoothing;
+    if (!Number.isFinite(rawX) || !Number.isFinite(rawY)) return;
+    rawX = clamp(rawX, 0, window.innerWidth);
+    rawY = clamp(rawY, 0, window.innerHeight);
+
+    if (lastAcceptedGaze) {
+      const jump = Math.hypot(rawX - lastAcceptedGaze.x, rawY - lastAcceptedGaze.y);
+      if (jump > Math.max(window.innerWidth, window.innerHeight) * 0.72) return;
+    }
+    lastAcceptedGaze = { x: rawX, y: rawY };
+
+    if (!hasSmoothedGaze) {
+      smoothX = rawX;
+      smoothY = rawY;
+      hasSmoothedGaze = true;
+    } else {
+      const distance = Math.hypot(rawX - smoothX, rawY - smoothY);
+      const alpha = clamp(settings.smoothing + distance / 1800, settings.smoothing, 0.62);
+      smoothX = smoothX * (1 - alpha) + rawX * alpha;
+      smoothY = smoothY * (1 - alpha) + rawY * alpha;
+    }
     pushGazeHistory(smoothX, smoothY);
     document.getElementById('current-coords').innerText = `(${Math.round(smoothX)}, ${Math.round(smoothY)})`;
 
@@ -1883,7 +2234,8 @@
 
   document.getElementById('inp-show-dot').addEventListener('change', (e) => {
     settings.showGazeDot = e.target.checked;
-    document.getElementById('gaze-dot').style.display = (settings.showGazeDot && isCalibrated) ? 'block' : 'none';
+    const gazeCanvas = document.getElementById('gaze-canvas');
+    if (gazeCanvas) gazeCanvas.style.display = (settings.showGazeDot && isCalibrated) ? 'block' : 'none';
   });
 
   const barsContainer = document.getElementById('bars-container');
@@ -1956,6 +2308,7 @@
       const r = cardEl.getBoundingClientRect();
       snapshotRects['card'] = { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
     }
+    archiveViewport = { width: window.innerWidth, height: window.innerHeight };
 
     document.getElementById('end-btn').style.display = 'none';
     document.getElementById('gaze-canvas').style.display = 'none';
@@ -2544,8 +2897,8 @@
     ctx.clearRect(0, 0, W, H);
 
     const rectsToUse = Object.keys(snapshotRects).length > 0 ? snapshotRects : {};
-    const SW = window.innerWidth;
-    const SH = window.innerHeight;
+    const SW = archiveViewport?.width || window.innerWidth;
+    const SH = archiveViewport?.height || window.innerHeight;
     const scale = Math.min(W / SW, H / SH);
     const offX = (W - SW * scale) / 2;
     const offY = (H - SH * scale) / 2;
@@ -2739,6 +3092,32 @@
     if (playBtn) playBtn.textContent = '▶';
   }
 
+  function heatmapColor(t) {
+    const ramp = [
+      [0.00,  20,  40, 170],
+      [0.18,   0, 145, 255],
+      [0.38,   0, 210, 180],
+      [0.58, 115, 230,  60],
+      [0.76, 255, 225,  40],
+      [0.90, 255, 110,  25],
+      [1.00, 230,  20,  20]
+    ];
+    const v = Math.max(0, Math.min(1, t));
+    for (let i = 1; i < ramp.length; i++) {
+      if (v <= ramp[i][0]) {
+        const prev = ramp[i - 1];
+        const next = ramp[i];
+        const p = (v - prev[0]) / (next[0] - prev[0] || 1);
+        return [
+          Math.round(prev[1] + (next[1] - prev[1]) * p),
+          Math.round(prev[2] + (next[2] - prev[2]) * p),
+          Math.round(prev[3] + (next[3] - prev[3]) * p)
+        ];
+      }
+    }
+    return [230, 20, 20];
+  }
+
   // ── 熱力図（以实际标识区域直方形为背景）─────────────────
   function renderHeatmap(overrideBgMode) {
     const wrap   = document.getElementById('heatmap-wrap');
@@ -2754,8 +3133,8 @@
     ctx.clearRect(0, 0, W, H);
 
     const rectsToUse = Object.keys(snapshotRects).length > 0 ? snapshotRects : {};
-    const SW = window.innerWidth;
-    const SH = window.innerHeight;
+    const SW = archiveViewport?.width || window.innerWidth;
+    const SH = archiveViewport?.height || window.innerHeight;
     const scale = Math.min(W / SW, H / SH);
     const offX  = (W - SW * scale) / 2;
     const offY  = (H - SH * scale) / 2;
@@ -2788,53 +3167,83 @@
       return;
     }
 
-    // ─ step2: 离屏 canvas 绘制高斯热力 ─
-    const offscreen = document.createElement('canvas');
-    offscreen.width  = W;
-    offscreen.height = H;
-    const octx = offscreen.getContext('2d');
-    const radius = Math.max(24, Math.min(80, W * 0.06));
-    for (const pt of filteredPoints) {
-      const [px, py] = toC(pt.x, pt.y);
-      const grad = octx.createRadialGradient(px, py, 0, px, py, radius);
-      grad.addColorStop(0,   'rgba(255,255,255,0.5)');
-      grad.addColorStop(0.5, 'rgba(255,255,255,0.18)');
-      grad.addColorStop(1,   'rgba(255,255,255,0)');
-      octx.fillStyle = grad;
-      octx.fillRect(px - radius, py - radius, radius*2, radius*2);
+    // ─ KDE density heatmap: Gaussian kernel accumulation + percentile normalization ─
+    const targetMaxSide = 760;
+    const densityScale = Math.min(1, targetMaxSide / Math.max(W, H));
+    const dW = Math.max(1, Math.round(W * densityScale));
+    const dH = Math.max(1, Math.round(H * densityScale));
+    const density = new Float32Array(dW * dH);
+    const baseRadius = Math.max(34, Math.min(96, Math.min(W, H) * 0.085));
+    const pointCountFactor = filteredPoints.length < 40 ? 1.22 : filteredPoints.length > 500 ? 0.88 : 1;
+    const radius = Math.max(18, Math.round(baseRadius * pointCountFactor * densityScale));
+    const sigma = Math.max(6, radius / 2.35);
+    const sigma2 = 2 * sigma * sigma;
+
+    const kernelSize = radius * 2 + 1;
+    const kernel = new Float32Array(kernelSize * kernelSize);
+    for (let ky = -radius; ky <= radius; ky++) {
+      for (let kx = -radius; kx <= radius; kx++) {
+        const d2 = kx * kx + ky * ky;
+        if (d2 <= radius * radius) {
+          kernel[(ky + radius) * kernelSize + (kx + radius)] = Math.exp(-d2 / sigma2);
+        }
+      }
     }
 
-    // ─ step3: 灰度 → 热力色彩映射 ─
-    const idata = octx.getImageData(0, 0, W, H);
-    const odata = ctx.createImageData(W, H);
-    for (let i = 0; i < idata.data.length; i += 4) {
-      const v = idata.data[i];
-      if (v < 4) continue;
-      const t = Math.min(v / 180, 1);
-      let rr, gg, bb, aa;
-      if (t < 0.25) {
-        rr = 0; gg = 0; bb = Math.round(180 + 75*(t/0.25)); aa = Math.round(t/0.25 * 160);
-      } else if (t < 0.5) {
-        const p = (t-0.25)/0.25;
-        rr = 0; gg = Math.round(255*p); bb = Math.round(255*(1-p)); aa = 180;
-      } else if (t < 0.75) {
-        const p = (t-0.5)/0.25;
-        rr = Math.round(255*p); gg = 255; bb = 0; aa = 200;
-      } else {
-        const p = (t-0.75)/0.25;
-        rr = 255; gg = Math.round(255*(1-p)); bb = 0; aa = 220;
+    for (let i = 0; i < filteredPoints.length; i++) {
+      const pt = filteredPoints[i];
+      const next = filteredPoints[i + 1];
+      const prev = filteredPoints[i - 1];
+      const sampleMs = next ? next.t - pt.t : (prev ? pt.t - prev.t : LOG_INTERVAL);
+      const weight = Math.max(0.45, Math.min(2.4, sampleMs / LOG_INTERVAL));
+      const [cx, cy] = toC(pt.x, pt.y);
+      const gx = Math.round(cx * densityScale);
+      const gy = Math.round(cy * densityScale);
+      const x0 = Math.max(0, gx - radius);
+      const x1 = Math.min(dW - 1, gx + radius);
+      const y0 = Math.max(0, gy - radius);
+      const y1 = Math.min(dH - 1, gy + radius);
+
+      for (let y = y0; y <= y1; y++) {
+        const row = y * dW;
+        const kernelRow = (y - gy + radius) * kernelSize;
+        for (let x = x0; x <= x1; x++) {
+          const kv = kernel[kernelRow + (x - gx + radius)];
+          if (kv > 0) density[row + x] += kv * weight;
+        }
       }
-      odata.data[i]   = rr;
-      odata.data[i+1] = gg;
-      odata.data[i+2] = bb;
-      odata.data[i+3] = aa;
     }
+
+    const nonZero = [];
+    for (let i = 0; i < density.length; i++) {
+      if (density[i] > 0.0001) nonZero.push(density[i]);
+    }
+    if (nonZero.length === 0) return;
+    nonZero.sort((a, b) => a - b);
+    const percentileIndex = Math.min(nonZero.length - 1, Math.floor(nonZero.length * 0.98));
+    const normalizer = Math.max(nonZero[percentileIndex], nonZero[nonZero.length - 1] * 0.45, 0.0001);
+
     const heatCanvas = document.createElement('canvas');
-    heatCanvas.width  = W;
-    heatCanvas.height = H;
+    heatCanvas.width = dW;
+    heatCanvas.height = dH;
     const hctx = heatCanvas.getContext('2d');
-    hctx.putImageData(odata, 0, 0);
-    ctx.drawImage(heatCanvas, 0, 0);
+    const image = hctx.createImageData(dW, dH);
+    for (let i = 0; i < density.length; i++) {
+      let t = Math.min(density[i] / normalizer, 1);
+      if (t < 0.025) continue;
+      t = Math.pow(t, 0.72);
+      const color = heatmapColor(t);
+      const alpha = Math.round((0.08 + 0.76 * Math.pow(t, 0.82)) * 255);
+      const p = i * 4;
+      image.data[p] = color[0];
+      image.data[p + 1] = color[1];
+      image.data[p + 2] = color[2];
+      image.data[p + 3] = alpha;
+    }
+    hctx.putImageData(image, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(heatCanvas, 0, 0, W, H);
   }
 
   // ── 时序图 ────────────────────────────────────────────
@@ -2967,49 +3376,249 @@
       <div class="summary-chip"><div class="val">${gazeLog.length}</div><div class="lbl">サンプル数</div></div>
       <div class="summary-chip"><div class="val" style="font-size:15px;">${topZone}</div><div class="lbl">最多注視ゾーン</div></div>
     `;
-    // 导出按鈕
-    const existingBtn = document.getElementById('export-json-btn');
+    // アーカイブ書き出しボタン
+    const existingBtn = document.getElementById('export-archive-btn');
     if (!existingBtn) {
       const exportBtn = document.createElement('button');
-      exportBtn.id = 'export-json-btn';
+      exportBtn.id = 'export-archive-btn';
       exportBtn.className = 'btn-primary';
       exportBtn.style.cssText = 'margin-top:20px; background:#1B5E20; font-size:15px; padding:10px 28px;';
-      exportBtn.textContent = '↓ JSONデータをエクスポート';
-      exportBtn.onclick = exportSessionJSON;
+      exportBtn.textContent = '↓ アーカイブを書き出す';
+      exportBtn.onclick = exportSessionArchive;
       document.getElementById('pane-stats').appendChild(exportBtn);
     }
   }
 
-  // ── JSON导出 ────────────────────────────────────────────────
-  function exportSessionJSON() {
-    const ts = new Date().toISOString().replace(/[:.]/g, '-');
-    const payload = {
+  function sanitizeFilenamePart(value) {
+    return String(value || 'anonymous')
+      .trim()
+      .replace(/[\\/:*?"<>|\s]+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 60) || 'anonymous';
+  }
+
+  function formatArchiveTimestamp(date = new Date()) {
+    const pad = n => String(n).padStart(2, '0');
+    return [
+      date.getFullYear(),
+      pad(date.getMonth() + 1),
+      pad(date.getDate())
+    ].join('') + '-' + [pad(date.getHours()), pad(date.getMinutes()), pad(date.getSeconds())].join('');
+  }
+
+  function getSessionDurationSec() {
+    return gazeLog.length > 0
+      ? +((gazeLog[gazeLog.length - 1].t - gazeLog[0].t) / 1000).toFixed(2)
+      : 0;
+  }
+
+  function normalizeWeights(weights = {}) {
+    const normalized = {};
+    for (const id in zoneState) {
+      const value = Number(weights[id]);
+      normalized[id] = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
+    }
+    return normalized;
+  }
+
+  function buildArchivePayload() {
+    const exportedAt = new Date();
+    const participant = participantName || 'anonymous';
+    const baseT = gazeLog[0]?.t || sessionStart || performance.now();
+    return {
+      archiveType: ARCHIVE_TYPE,
+      archiveVersion: ARCHIVE_VERSION,
       meta: {
-        participant: participantName || 'anonymous',
-        exportedAt: new Date().toISOString(),
-        sessionDurationSec: gazeLog.length > 0
-          ? +((gazeLog[gazeLog.length-1].t - gazeLog[0].t) / 1000).toFixed(2)
-          : 0,
+        participant,
+        exportedAt: exportedAt.toISOString(),
+        sessionDurationSec: getSessionDurationSec(),
         sampleCount: gazeLog.length,
-        settings: { ...settings }
+        settings: { ...settings },
+        viewport: {
+          width: archiveViewport?.width || window.innerWidth,
+          height: archiveViewport?.height || window.innerHeight
+        }
+      },
+      layout: {
+        snapshotRects: JSON.parse(JSON.stringify(snapshotRects || {})),
+        zoneNames: { ...zoneNames },
+        zoneColors: { ...ZONE_COLORS }
       },
       gazeLog: gazeLog.map(p => ({
-        t_ms: Math.round(p.t - (gazeLog[0]?.t || 0)),
+        t_ms: Math.round(p.t - baseT),
         x: Math.round(p.x),
         y: Math.round(p.y),
         zone: p.zone || null,
         weights: Object.fromEntries(
-          Object.entries(p.weights).map(([k, v]) => [k, +v.toFixed(1)])
+          Object.entries(normalizeWeights(p.weights)).map(([k, v]) => [k, +v.toFixed(1)])
         )
       }))
     };
+  }
+
+  function getArchiveFilename(payload) {
+    const participant = sanitizeFilenamePart(payload?.meta?.participant || participantName || 'anonymous');
+    const exportedAt = payload?.meta?.exportedAt ? new Date(payload.meta.exportedAt) : new Date();
+    const ts = formatArchiveTimestamp(Number.isNaN(exportedAt.getTime()) ? new Date() : exportedAt);
+    return `${participant}_${ts}_pro.json`;
+  }
+
+  // ── アーカイブ書き出し ─────────────────────────────────────
+  function exportSessionArchive() {
+    const payload = buildArchivePayload();
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `gaze_${participantName || 'anonymous'}_${ts}.json`;
+    a.download = getArchiveFilename(payload);
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function exportSessionJSON() {
+    exportSessionArchive();
+  }
+
+  function parseArchiveGazeLog(payload) {
+    const records = Array.isArray(payload?.gazeLog) ? payload.gazeLog : [];
+    if (records.length === 0) return [];
+    const firstRawT = Number(records[0].t ?? records[0].timestamp_ms ?? 0);
+    const baseT = performance.now();
+    const viewport = payload?.meta?.viewport || {};
+    const maxX = Number(viewport.width) || window.innerWidth;
+    const maxY = Number(viewport.height) || window.innerHeight;
+
+    return records.map((p, index) => {
+      const tMs = Number(p.t_ms);
+      const rawT = Number(p.t ?? p.timestamp_ms);
+      const relativeT = Number.isFinite(tMs)
+        ? tMs
+        : (Number.isFinite(rawT) ? rawT - firstRawT : index * LOG_INTERVAL);
+      const x = Number(p.x);
+      const y = Number(p.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return {
+        t: baseT + Math.max(0, relativeT),
+        x: clamp(x, 0, maxX),
+        y: clamp(y, 0, maxY),
+        zone: p.zone || null,
+        weights: normalizeWeights(p.weights)
+      };
+    }).filter(Boolean);
+  }
+
+  function applySettingsToAdminControls() {
+    const controls = [
+      ['inp-sens', 'val-sens', settings.sensitivity],
+      ['inp-decay', 'val-decay', settings.decay],
+      ['inp-smooth', 'val-smooth', settings.smoothing]
+    ];
+    for (const [inputId, valueId, value] of controls) {
+      const input = document.getElementById(inputId);
+      const label = document.getElementById(valueId);
+      if (input) input.value = value;
+      if (label) label.innerText = value;
+    }
+    const dotToggle = document.getElementById('inp-show-dot');
+    if (dotToggle) dotToggle.checked = !!settings.showGazeDot;
+  }
+
+  function showArchiveReport(payload) {
+    const importedLog = parseArchiveGazeLog(payload);
+    if (importedLog.length === 0) {
+      throw new Error('アーカイブ内に有効な視線データがありません。');
+    }
+
+    participantName = payload?.meta?.participant || 'anonymous';
+    gazeLog = importedLog;
+    sessionStart = gazeLog[0].t;
+    lastLogTime = gazeLog[gazeLog.length - 1].t;
+    archiveViewport = {
+      width: Number(payload?.meta?.viewport?.width) || window.innerWidth,
+      height: Number(payload?.meta?.viewport?.height) || window.innerHeight
+    };
+    snapshotRects = payload?.layout?.snapshotRects && typeof payload.layout.snapshotRects === 'object'
+      ? payload.layout.snapshotRects
+      : {};
+
+    if (payload?.meta?.settings && typeof payload.meta.settings === 'object') {
+      for (const key of ['sensitivity', 'decay', 'smoothing']) {
+        const value = Number(payload.meta.settings[key]);
+        if (Number.isFinite(value)) settings[key] = value;
+      }
+      if (typeof payload.meta.settings.showGazeDot === 'boolean') {
+        settings.showGazeDot = payload.meta.settings.showGazeDot;
+      }
+      applySettingsToAdminControls();
+    }
+
+    const last = gazeLog[gazeLog.length - 1];
+    for (const id in zoneState) zoneState[id].weight = last.weights[id] || 0;
+    applyAllZoneEffects();
+    updateAdminWeightBars();
+
+    interactionEnabled = false;
+    isCalibrated = false;
+    mainLoopRunning = false;
+    canvasLoopRunning = false;
+    gazeHistory.length = 0;
+    stopCameraPreview();
+    document.getElementById('end-btn').style.display = 'none';
+    document.getElementById('gaze-canvas').style.display = 'none';
+    document.getElementById('admin-toggle').style.display = 'none';
+    document.getElementById('calibration-overlay').style.display = 'none';
+    document.getElementById('calibration-overlay').style.opacity = '1';
+    document.querySelectorAll('.calib-step').forEach(step => step.classList.remove('active'));
+
+    const overlay = document.getElementById('analysis-overlay');
+    overlay.classList.add('visible');
+    const dur = getSessionDurationSec().toFixed(1);
+    const exportedAt = payload?.meta?.exportedAt ? new Date(payload.meta.exportedAt) : null;
+    const loadedLabel = exportedAt && !Number.isNaN(exportedAt.getTime())
+      ? `読み込み: ${exportedAt.toLocaleString('ja-JP')}`
+      : '読み込みアーカイブ';
+    document.getElementById('session-duration-label').textContent =
+      ` — ${participantName}  ｜  セッション時間: ${dur}秒  ｜  ${loadedLabel}`;
+
+    initTimeFilters();
+    switchTab('heatmap');
+    setTimeout(() => {
+      renderHeatmap();
+      renderTimeline();
+      renderTable();
+      renderGazePath();
+    }, 80);
+  }
+
+  function loadArchiveFromHome(event) {
+    const input = event.target;
+    const file = input.files && input.files[0];
+    const status = document.getElementById('archive-import-status');
+    if (!file) return;
+    status.textContent = 'アーカイブを読み込んでいます...';
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(reader.result);
+        if (payload.archiveType && payload.archiveType !== ARCHIVE_TYPE) {
+          throw new Error('対応していないアーカイブ形式です。');
+        }
+        showArchiveReport(payload);
+        status.textContent = '';
+      } catch (err) {
+        console.error('Archive import failed:', err);
+        status.textContent = `読み込みに失敗しました: ${err.message || err}`;
+      } finally {
+        input.value = '';
+      }
+    };
+    reader.onerror = () => {
+      status.textContent = 'ファイルを読み込めませんでした。';
+      input.value = '';
+    };
+    reader.readAsText(file);
   }
 
   // ── 重新开始 ────────────────────────────────────────────────
@@ -3022,13 +3631,17 @@
     applyAllZoneEffects();
     document.getElementById('analysis-overlay').classList.remove('visible');
     // 回到署名页重新输入
-    const exportBtn = document.getElementById('export-json-btn');
+    const exportBtn = document.getElementById('export-archive-btn');
     if (exportBtn) exportBtn.remove();
     document.getElementById('participant-name').value = '';
     document.getElementById('name-error').textContent = '';
+    document.getElementById('archive-import-status').textContent = '';
     participantName = '';
+    archiveViewport = null;
+    snapshotRects = {};
     
     // 隐藏主界面的控制按钮与 gaze canvas，等开始体验/模拟时再恢复
+    stopCameraPreview();
     document.getElementById('gaze-canvas').style.display = 'none';
     document.getElementById('end-btn').style.display = 'none';
     document.getElementById('admin-toggle').style.display = 'none';
@@ -3038,19 +3651,13 @@
     document.getElementById('step-1').classList.remove('active');
     document.getElementById('step-2').classList.remove('active');
     document.getElementById('step-3').classList.remove('active');
+    document.getElementById('step-4').classList.remove('active');
     document.getElementById('calibration-overlay').style.opacity = '1';
     document.getElementById('calibration-overlay').style.display = 'flex';
     setTimeout(() => document.getElementById('participant-name').focus(), 200);
 
-    // 清理可能已经存在的 Demo MouseMove 监听器
-    if (demoMouseMoveHandler) {
-      document.removeEventListener('mousemove', demoMouseMoveHandler);
-      demoMouseMoveHandler = null;
-    }
-
     // 重置变量与守护状态，确保不会产生并发多重AnimationFrame循环
     isCalibrated = false;
-    isDemoMode = false;
     interactionEnabled = false;
     mainLoopRunning = false;
     canvasLoopRunning = false;
