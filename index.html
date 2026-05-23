@@ -1254,6 +1254,8 @@
   let isCalibrated = false;
   let isDemoMode = false;
   let interactionEnabled = false;
+  let demoMouseMoveHandler = null; // 保持对鼠标模拟事件监听器的引用
+  let mainLoopRunning = false;     // mainLoop 运行状态守护
 
   // 注视轨迹缓冲区：保存过去 2 秒内所有平滑坐标
   const gazeHistory = [];
@@ -1340,10 +1342,17 @@
         const el = document.getElementById(id);
         if (el) zoneRects[id] = el.getBoundingClientRect();
       }
-      document.addEventListener('mousemove', (e) => {
+      
+      // 移除旧的监听器，防止多次叠加
+      if (demoMouseMoveHandler) {
+        document.removeEventListener('mousemove', demoMouseMoveHandler);
+      }
+      demoMouseMoveHandler = (e) => {
         onGaze(e.clientX, e.clientY);
-      });
-      requestAnimationFrame(mainLoop);
+      };
+      document.addEventListener('mousemove', demoMouseMoveHandler);
+      
+      startMainLoop();
       interactionEnabled = true; // 鼠标模拟模式不需要冷却
       showEndBtn();
     }, 500);
@@ -1398,46 +1407,59 @@
     });
 
     // begin() 接受一个「失败回调」作为第一个参数（v3 API）
-    webgazer.begin(
-      // onFail: 摄像头访问失败时调用
-      (err) => {
-        console.error('WebGazer カメラ失敗:', err);
-        let msg = '⚠ カメラにアクセスできませんでした。<br>';
-        if (err && err.name === 'NotAllowedError') {
-          msg += 'カメラの権限が拒否されています。<br>URLバーの 🔒 アイコンからカメラを<b>許可</b>してください。';
-        } else if (err && err.name === 'NotFoundError') {
-          msg += 'カメラデバイスが見つかりません。';
-        } else if (err && err.name === 'NotReadableError') {
-          msg += '他のアプリがカメラを占有しています。Zoom/Teamsなどを閉じてから再試行してください。';
-        } else {
-          msg += `エラー: ${err ? (err.name + ' — ' + err.message) : '不明'}`;
+    try {
+      const beginResult = webgazer.begin(
+        // onFail: 摄像头访问失败时调用
+        (err) => {
+          console.error('WebGazer カメラ失敗:', err);
+          let msg = '⚠ カメラにアクセスできませんでした。<br>';
+          if (err && err.name === 'NotAllowedError') {
+            msg += 'カメラの権限が拒否されています。<br>URLバーの 🔒 アイコンからカメラを<b>許可</b>してください。';
+          } else if (err && err.name === 'NotFoundError') {
+            msg += 'カメラデバイスが見つかりません。';
+          } else if (err && err.name === 'NotReadableError') {
+            msg += '他のアプリがカメラを占有しています。Zoom/Teamsなどを閉じてから再试行してください。';
+          } else {
+            msg += `エラー: ${err ? (err.name + ' — ' + err.message) : '不明'}`;
+          }
+          progressEl.innerHTML = msg + '<br><br>👇 マウスモードを使用してください。';
+          setTimeout(() => {
+            step2El.classList.remove('active');
+            step1El.classList.add('active');
+          }, 4000);
         }
-        progressEl.innerHTML = msg + '<br><br>👇 マウスモードを使用してください。';
+      );
+
+      Promise.resolve(beginResult).then(() => {
+        // 确保如果是暂停状态，能够恢复
+        webgazer.resume();
+        // begin() 成功，摄像头已启动
+        webgazer.showVideoPreview(true);
+        webgazer.showFaceOverlay(false);
+        webgazer.showFaceFeedbackBox(false);
+        // 校准阶段展示 canvas，让用户实时看到轨迹反馈
+        showGazeCanvas();
+
+        // 显示校准点
+        showNextCalibPoint();
+        startCalibKeyboard(); // 注册键盘快捷键
+      }).catch(err => {
+        // begin() 本身抛出的其他错误（模型加载失败等）
+        console.error('WebGazer begin() エラー:', err);
+        progressEl.innerHTML = `⚠ モデルの読み込みに失敗しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>👇 マウスモードを使用してください。`;
         setTimeout(() => {
           step2El.classList.remove('active');
           step1El.classList.add('active');
         }, 4000);
-      }
-    ).then(() => {
-      // begin() 成功，摄像头已启动
-      webgazer.showVideoPreview(true);
-      webgazer.showFaceOverlay(false);
-      webgazer.showFaceFeedbackBox(false);
-      // 校准阶段展示 canvas，让用户实时看到轨迹反馈
-      showGazeCanvas();
-
-      // 显示校准点
-      showNextCalibPoint();
-      startCalibKeyboard(); // 注册键盘快捷键
-    }).catch(err => {
-      // begin() 本身抛出的其他错误（模型加载失败等）
-      console.error('WebGazer begin() エラー:', err);
-      progressEl.innerHTML = `⚠ モデルの読み込みに失敗しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>👇 マウスモードを使用してください。`;
+      });
+    } catch (err) {
+      console.error('WebGazer begin() 例外:', err);
+      progressEl.innerHTML = `⚠ カメラの起動中に例外が発生しました。<br><small>${err && err.message ? err.message : String(err)}</small><br><br>👇 マウスモードを使用してください。`;
       setTimeout(() => {
         step2El.classList.remove('active');
         step1El.classList.add('active');
       }, 4000);
-    });
+    }
   }
 
   // 校准点点击逻辑（鼠标点击和键盘共用此函数）
@@ -1535,7 +1557,7 @@
         const el = document.getElementById(id);
         if (el) zoneRects[id] = el.getBoundingClientRect();
       }
-      requestAnimationFrame(mainLoop);
+      startMainLoop();
 
       // 给予2秒的冷却时间，排除确认点击和头部初始移动造成的干扰
       setTimeout(() => {
@@ -1661,7 +1683,16 @@
 
   let lastFrameTime = performance.now();
 
+  function startMainLoop() {
+    if (!mainLoopRunning) {
+      mainLoopRunning = true;
+      lastFrameTime = performance.now();
+      requestAnimationFrame(mainLoop);
+    }
+  }
+
   function mainLoop(now) {
+    if (!mainLoopRunning) return;
     const dt = (now - lastFrameTime) / 1000;
     lastFrameTime = now;
 
@@ -1899,6 +1930,17 @@
   function endSession() {
     interactionEnabled = false;
     canvasLoopRunning = false;
+    mainLoopRunning = false; // 停止主循环
+    
+    // 暂停 WebGazer 并隐藏视频预览
+    if (typeof webgazer !== 'undefined') {
+      try {
+        webgazer.pause();
+        webgazer.showVideoPreview(false);
+      } catch (e) {
+        console.error('Error pausing webgazer on session end:', e);
+      }
+    }
     // 在 overlay 显示前先快照当前屏幕坐标
     snapshotRects = {};
     for (const id in zoneState) {
@@ -2985,21 +3027,47 @@
     document.getElementById('participant-name').value = '';
     document.getElementById('name-error').textContent = '';
     participantName = '';
+    
+    // 隐藏主界面的控制按钮与 gaze canvas，等开始体验/模拟时再恢复
+    document.getElementById('gaze-canvas').style.display = 'none';
+    document.getElementById('end-btn').style.display = 'none';
+    document.getElementById('admin-toggle').style.display = 'none';
+    
+    // UI状态切换至第一步（署名页）
     document.getElementById('step-0').classList.add('active');
     document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-3').classList.remove('active');
     document.getElementById('calibration-overlay').style.opacity = '1';
     document.getElementById('calibration-overlay').style.display = 'flex';
     setTimeout(() => document.getElementById('participant-name').focus(), 200);
-    // 重启 Canvas循环
-    document.getElementById('gaze-canvas').style.display = 'block';
-    document.getElementById('admin-toggle').style.display = 'flex';
-    document.getElementById('end-btn').style.display = 'flex';
-    canvasLoopRunning = true;
-    interactionEnabled = true;
-    (function canvasLoop() {
-      drawGazeCanvas();
-      if (canvasLoopRunning) requestAnimationFrame(canvasLoop);
-    })();
+
+    // 清理可能已经存在的 Demo MouseMove 监听器
+    if (demoMouseMoveHandler) {
+      document.removeEventListener('mousemove', demoMouseMoveHandler);
+      demoMouseMoveHandler = null;
+    }
+
+    // 重置变量与守护状态，确保不会产生并发多重AnimationFrame循环
+    isCalibrated = false;
+    isDemoMode = false;
+    interactionEnabled = false;
+    mainLoopRunning = false;
+    canvasLoopRunning = false;
+    
+    // 重置校准点索引
+    currentCalibIdx = 0;
+    currentPointClicks = 0;
+
+    // 如果 WebGazer 在运行，先暂停并隐藏
+    if (typeof webgazer !== 'undefined') {
+      try {
+        webgazer.pause();
+        webgazer.showVideoPreview(false);
+      } catch (e) {
+        console.error('Error pausing webgazer on restart:', e);
+      }
+    }
   }
 
 </script>
